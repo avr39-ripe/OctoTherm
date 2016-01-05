@@ -1,4 +1,4 @@
-#include <tytherm.h>
+#include <octotherm.h>
 
 
 bool serverStarted = false;
@@ -50,7 +50,7 @@ void onConfiguration(HttpRequest &request, HttpResponse &response)
 				else
 				{
 					WifiStation.disconnect();
-					WifiAccessPoint.config("TyTherm", "20040229", AUTH_WPA2_PSK);
+					WifiAccessPoint.config("OctoTherm", "20040229", AUTH_WPA2_PSK);
 					WifiAccessPoint.enable(true);
 				}
 			}

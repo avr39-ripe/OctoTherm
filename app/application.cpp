@@ -1,12 +1,10 @@
 #include <user_config.h>
-#include <tytherm.h>
+#include <octotherm.h>
 
 Timer counterTimer;
 void counter_loop();
 unsigned long counter = 0;
-
-OneWire ds(onewire_pin);
-TempSensorOW tempSensor(ds);
+TempSensorHttp tempSensor("http://192.168.31.130/state");
 
 void init()
 {
@@ -35,10 +33,7 @@ void init()
 	startWebServer();
 
 	counterTimer.initializeMs(1000, counter_loop).start();
-
-	ds.begin();
 	tempSensor.start();
-
 }
 
 void counter_loop()
@@ -56,6 +51,6 @@ void StaConnectFail()
 {
 	Serial.println("connection FAILED");
 	WifiStation.disconnect();
-	WifiAccessPoint.config("TyTherm", "20040229", AUTH_WPA2_PSK);
+	WifiAccessPoint.config("OctoTherm", "20040229", AUTH_WPA2_PSK);
 	WifiAccessPoint.enable(true);
 }

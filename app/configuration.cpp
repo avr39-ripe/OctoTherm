@@ -1,4 +1,4 @@
-#include <tytherm.h>
+#include <octotherm.h>
 
 ThermConfig ActiveConfig;
 

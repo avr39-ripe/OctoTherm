@@ -1,18 +1,17 @@
-#ifndef INCLUDE_TYTHERM_H_
-#define INCLUDE_TYTHERM_H_
+#ifndef INCLUDE_OCTOTHERM_H_
+#define INCLUDE_OCTOTHERM_H_
 #include <configuration.h>
 #include <SmingCore/SmingCore.h>
 #include <Libraries/OneWire/OneWire.h>
-
-#include "tempsensor.h"
+#include <tempsensor.h>
 
 //OneWire stuff
 const uint8_t onewire_pin = 2;
 extern OneWire ds;
-
-extern TempSensorOW tempSensor;
+extern TempSensorHttp tempSensor;
 
 extern unsigned long counter; // Kind of heartbeat counter
+extern float temperature; // TyTherm accuired temperature
 
 const uint8_t ConfigJsonBufferSize = 200; // Application configuration JsonBuffer size ,increase it if you have large config
 const uint16_t ConfigFileBufferSize = 2048; // Application configuration FileBuffer size ,increase it if you have large config
