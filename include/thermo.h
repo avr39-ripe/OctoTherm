@@ -19,12 +19,12 @@ struct SchedUnit
 class Thermostat
 {
 public:
-	Thermostat(String description, uint16_t update);
+	Thermostat(String description, uint16_t refresh = 4000);
 	float getTemperature() { return _temperature; };
 	bool check();
 	uint8_t getState() { return _state; };
 private:
-	uint16_t _update; // thermostat update interval
+	uint16_t _refresh; // thermostat update interval
 	Timer _thermostatTimer; // timer for thermostat update
 	float _getCurrTemp(); // get current temperature from sensor
 	SchedUnit _schedule[7][maxProg]; // 7 day X maxProg programs in schedule
