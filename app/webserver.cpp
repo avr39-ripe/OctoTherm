@@ -96,7 +96,7 @@ void onAJAXGetState(HttpRequest &request, HttpResponse &response)
 	JsonObject& json = stream->getRoot();
 
 	json["counter"] = counter;
-	json["temperature"] = temperature;
+	json["temperature"] = tempSensor.getTemp();
 
 	response.sendJsonObject(stream);
 }

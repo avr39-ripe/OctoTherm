@@ -3,10 +3,12 @@
 #include <configuration.h>
 #include <SmingCore/SmingCore.h>
 #include <Libraries/OneWire/OneWire.h>
+#include <tempsensor.h>
 
 //OneWire stuff
 const uint8_t onewire_pin = 2;
 extern OneWire ds;
+extern TempSensorHttp tempSensor;
 
 extern unsigned long counter; // Kind of heartbeat counter
 extern float temperature; // TyTherm accuired temperature
