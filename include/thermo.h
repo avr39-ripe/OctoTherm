@@ -33,6 +33,7 @@ public:
 //	void setSched(uint8_t wDay, uint8_t progNum, uint16_t minutes, float tergetTemp);
 //	SchedUnit getSched(uint8_t wDay, uint8_t progNum);
 	SchedUnit _schedule[7][maxProg]; // 7 day X maxProg programs in schedule
+	float _targetTempDelta = 0.5;
 	uint8_t getState() { return _state; };
 	String getDescription() { return _description; };
 private:
