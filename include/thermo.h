@@ -26,7 +26,7 @@ struct SchedUnit
 class Thermostat
 {
 public:
-	Thermostat(TempSensor &tempSensor, String description, uint16_t refresh);
+	Thermostat(TempSensor &tempSensor, String description = "Thermostat", uint16_t refresh = 4000);
 	void start();
 	void stop();
 	void check();

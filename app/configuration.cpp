@@ -18,6 +18,9 @@ ThermConfig loadConfig()
 		cfg.StaPassword = String((const char*)network["StaPassword"]);
 		cfg.StaEnable = network["StaEnable"];
 
+		JsonObject& settings = root["settings"];
+		cfg.sensorUrl = String((const char*)settings["sensorUrl"]);
+
 		delete[] jsonString;
 	}
 	else
@@ -39,6 +42,10 @@ void saveConfig(ThermConfig& cfg)
 	network["StaSSID"] = cfg.StaSSID.c_str();
 	network["StaPassword"] = cfg.StaPassword.c_str();
 	network["StaEnable"] = cfg.StaEnable;
+
+	JsonObject& settings = jsonBuffer.createObject();
+	root["settings"] = settings;
+	settings["sensorUrl"] = cfg.sensorUrl;
 
 	char buf[ConfigFileBufferSize];
 	root.prettyPrintTo(buf, sizeof(buf));

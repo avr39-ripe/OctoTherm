@@ -4,13 +4,15 @@
 Timer counterTimer;
 void counter_loop();
 unsigned long counter = 0;
-TempSensorHttp tempSensor("http://192.168.31.130/state");
-
+//TempSensorHttp tempSensor("http://10.2.113.114/state");
+//Thermostat thermostat(tempSensor,"Office", 4000);
+TempSensorHttp *tempSensor;
+Thermostat *thermostat;
 void init()
 {
 	spiffs_mount(); // Mount file system, in order to work with files
 	Serial.begin(SERIAL_BAUD_RATE); // 115200 by default
-	Serial.systemDebugOutput(false);
+	Serial.systemDebugOutput(true);
 	Serial.commandProcessing(false);
 
 	//SET higher CPU freq & disable wifi sleep
@@ -18,6 +20,9 @@ void init()
 	wifi_set_sleep_type(NONE_SLEEP_T);
 
 	ActiveConfig = loadConfig();
+
+	tempSensor = new TempSensorHttp(ActiveConfig.sensorUrl);
+	thermostat = new Thermostat(*tempSensor,"Office", 4000);
 
 	if (ActiveConfig.StaEnable)
 	{
@@ -33,7 +38,7 @@ void init()
 	startWebServer();
 
 	counterTimer.initializeMs(1000, counter_loop).start();
-	tempSensor.start();
+	tempSensor->start();
 }
 
 void counter_loop()

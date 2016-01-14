@@ -142,17 +142,17 @@ void TempSensorHttp::_temp_start()
 
 void TempSensorHttp::_temp_read(HttpClient& client, bool successful)
 {
-//	Serial.println("temp-read");
+	Serial.println("temp-read");
 	if (successful)
 	{
-//	Serial.println("tr-succes");
+	Serial.println("tr-succes");
 		String response = client.getResponseString();
 		if (response.length() > 0)
 		{
-//		Serial.println("res>0");
+		Serial.println("res>0");
 			StaticJsonBuffer<200> jsonBuffer;
 			JsonObject& root = jsonBuffer.parseObject(response);
-//			root.prettyPrintTo(Serial); //Uncomment it for debuging
+			root.prettyPrintTo(Serial); //Uncomment it for debuging
 			if (root["temperature"].success())
 			{
 				_temperature = root["temperature"];
