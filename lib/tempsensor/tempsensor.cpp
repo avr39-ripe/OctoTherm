@@ -134,7 +134,10 @@ TempSensorHttp::TempSensorHttp(String url, uint16_t refresh)
 void TempSensorHttp::_temp_start()
 {
 	if (_httpClient.isProcessing())
+	{
+		Serial.println("BAD LUCK! Processing ;()");
 		return; // We need to wait while request processing was completed
+	}
 	else
 		_httpClient.downloadString(_url, HttpClientCompletedDelegate(&TempSensorHttp::_temp_read, this));
 
