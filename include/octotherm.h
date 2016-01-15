@@ -15,8 +15,8 @@ extern Thermostat *thermostat;
 extern unsigned long counter; // Kind of heartbeat counter
 extern float temperature; // TyTherm accuired temperature
 
-const uint8_t ConfigJsonBufferSize = 200; // Application configuration JsonBuffer size ,increase it if you have large config
-const uint16_t ConfigFileBufferSize = 2048; // Application configuration FileBuffer size ,increase it if you have large config
+const uint16_t ConfigJsonBufferSize = 300; // Application configuration JsonBuffer size ,increase it if you have large config
+const uint16_t ConfigFileBufferSize = 2500; // Application configuration FileBuffer size ,increase it if you have large config
 
 //Webserver
 void startWebServer();
