@@ -4,8 +4,8 @@
 Timer counterTimer;
 void counter_loop();
 unsigned long counter = 0;
-TempSensorHttp tempSensor("http://192.168.31.130/state");
-
+TempSensorHttp *tempSensor;
+Thermostat *thermostat;
 void init()
 {
 	spiffs_mount(); // Mount file system, in order to work with files
@@ -19,9 +19,14 @@ void init()
 
 	ActiveConfig = loadConfig();
 
+	tempSensor = new TempSensorHttp(ActiveConfig.sensorUrl);
+	thermostat = new Thermostat(*tempSensor,"Office", 4000);
+
 	if (ActiveConfig.StaEnable)
 	{
 		WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
+		WifiStation.enableDHCP(false);
+		WifiStation.setIP((String)"10.2.113.125", (String)"255.255.255.128", (String)"10.2.113.1");
 		WifiStation.enable(true);
 		WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
 	}
@@ -33,7 +38,7 @@ void init()
 	startWebServer();
 
 	counterTimer.initializeMs(1000, counter_loop).start();
-	tempSensor.start();
+	tempSensor->start();
 }
 
 void counter_loop()

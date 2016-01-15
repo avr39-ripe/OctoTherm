@@ -54,6 +54,10 @@ void onConfiguration(HttpRequest &request, HttpResponse &response)
 					WifiAccessPoint.enable(true);
 				}
 			}
+			if (root["sensorUrl"].success())
+			{
+				ActiveConfig.sensorUrl = String((const char *)root["sensorUrl"]);
+			}
 		}
 		saveConfig(ActiveConfig);
 	}
@@ -72,6 +76,7 @@ void onConfiguration_json(HttpRequest &request, HttpResponse &response)
 	json["StaSSID"] = ActiveConfig.StaSSID;
 	json["StaPassword"] = ActiveConfig.StaPassword;
 	json["StaEnable"] = ActiveConfig.StaEnable;
+	json["sensorUrl"] = ActiveConfig.sensorUrl;
 
 	response.sendJsonObject(stream);
 }
@@ -96,7 +101,7 @@ void onAJAXGetState(HttpRequest &request, HttpResponse &response)
 	JsonObject& json = stream->getRoot();
 
 	json["counter"] = counter;
-	json["temperature"] = tempSensor.getTemp();
+	json["temperature"] = tempSensor->getTemp();
 
 	response.sendJsonObject(stream);
 }

@@ -29,10 +29,25 @@ function post_netcfg(event) {
     })
 }
 
+function post_config(event) {
+	event.preventDefault();
+	var formData = {
+			'sensorUrl'			:	document.getElementById('sensorUrl').value
+			};
+	$.ajax({
+        type        : 'POST',
+        url         : '/config',
+        contentType	: 'application/json; charset=utf-8',
+        data        : JSON.stringify(formData),
+        dataType	: 'json'
+    })
+}
 
 $( document ).ready(function() {
 	get_config();
 	
 	document.getElementById('form_netcfg').addEventListener('submit', post_netcfg);
 	document.getElementById('netcfg_cancel').addEventListener('click', get_config);
+	document.getElementById('form_settings').addEventListener('submit', post_config);
+	document.getElementById('settings_cancel').addEventListener('click', get_config);
 });
