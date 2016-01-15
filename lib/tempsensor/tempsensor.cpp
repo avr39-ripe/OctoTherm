@@ -134,10 +134,7 @@ TempSensorHttp::TempSensorHttp(String url, uint16_t refresh)
 void TempSensorHttp::_temp_start()
 {
 	if (_httpClient.isProcessing())
-	{
-		Serial.println("BAD LUCK! Processing ;()");
 		return; // We need to wait while request processing was completed
-	}
 	else
 		_httpClient.downloadString(_url, HttpClientCompletedDelegate(&TempSensorHttp::_temp_read, this));
 
@@ -145,17 +142,17 @@ void TempSensorHttp::_temp_start()
 
 void TempSensorHttp::_temp_read(HttpClient& client, bool successful)
 {
-	Serial.println("temp-read");
+//	Serial.println("temp-read");
 	if (successful)
 	{
-	Serial.println("tr-succes");
+//	Serial.println("tr-succes");
 		String response = client.getResponseString();
 		if (response.length() > 0)
 		{
-		Serial.println("res>0");
+//		Serial.println("res>0");
 			StaticJsonBuffer<200> jsonBuffer;
 			JsonObject& root = jsonBuffer.parseObject(response);
-			root.prettyPrintTo(Serial); //Uncomment it for debuging
+//			root.prettyPrintTo(Serial); //Uncomment it for debuging
 			if (root["temperature"].success())
 			{
 				_temperature = root["temperature"];

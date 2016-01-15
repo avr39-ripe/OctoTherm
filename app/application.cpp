@@ -4,15 +4,13 @@
 Timer counterTimer;
 void counter_loop();
 unsigned long counter = 0;
-//TempSensorHttp tempSensor("http://10.2.113.114/state");
-//Thermostat thermostat(tempSensor,"Office", 4000);
 TempSensorHttp *tempSensor;
 Thermostat *thermostat;
 void init()
 {
 	spiffs_mount(); // Mount file system, in order to work with files
 	Serial.begin(SERIAL_BAUD_RATE); // 115200 by default
-	Serial.systemDebugOutput(true);
+	Serial.systemDebugOutput(false);
 	Serial.commandProcessing(false);
 
 	//SET higher CPU freq & disable wifi sleep
@@ -27,6 +25,8 @@ void init()
 	if (ActiveConfig.StaEnable)
 	{
 		WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
+		WifiStation.enableDHCP(false);
+		WifiStation.setIP((String)"10.2.113.125", (String)"255.255.255.128", (String)"10.2.113.1");
 		WifiStation.enable(true);
 		WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
 	}
