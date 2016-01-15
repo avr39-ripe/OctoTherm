@@ -10,7 +10,7 @@
 #include <SmingCore/SmingCore.h>
 #include <tempsensor.h>
 
-const uint8_t maxProg = 6;
+const uint8_t maxProg = 2;
 
 struct SchedUnit
 {

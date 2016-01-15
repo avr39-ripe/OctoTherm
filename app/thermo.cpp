@@ -19,6 +19,7 @@ void Thermostat::check()
 {
 	float currTemp = _tempSensor->getTemp();
 	DateTime now = SystemClock.now(eTZ_Local);
+	Serial.print("DateTime: "); Serial.println(now.toFullDateTimeString());
 	SchedUnit daySchedule[maxProg] = _schedule[now.DayofWeek];
 	float targetTemp;
 	uint16_t nowMinutes = now.Hour * 60 + now.Minute;
@@ -28,7 +29,9 @@ void Thermostat::check()
 		uint8_t nextIdx = i < (maxProg - 1) ? i + 1 : 0;
 		if ( (nowMinutes >= daySchedule[i].minutes) && (nowMinutes <= daySchedule[nextIdx].minutes) )
 		{
+			Serial.print("Idx: "); Serial.println(i);
 			targetTemp = daySchedule[i].targetTemp;
+			Serial.print("targetTemp: "); Serial.println(targetTemp);
 			break;
 		}
 	}
@@ -36,6 +39,7 @@ void Thermostat::check()
 		_state = false;
 	if (currTemp <= targetTemp - _targetTempDelta)
 		_state = true;
+	Serial.printf("State: %s\n", _state ? "true" : "false");
 }
 
 void Thermostat::start()

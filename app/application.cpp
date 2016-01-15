@@ -22,6 +22,14 @@ void init()
 	tempSensor = new TempSensorHttp(ActiveConfig.sensorUrl);
 	thermostat = new Thermostat(*tempSensor,"Office", 4000);
 
+	for(uint8_t i = 0; i< maxProg; i++)
+	{
+		thermostat->_schedule[i][0].minutes = 0;
+		thermostat->_schedule[i][0].targetTemp = 19;
+		thermostat->_schedule[i][1].minutes = 420;
+		thermostat->_schedule[i][1].targetTemp = 25;
+	}
+
 	if (ActiveConfig.StaEnable)
 	{
 		WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
@@ -39,6 +47,7 @@ void init()
 
 	counterTimer.initializeMs(1000, counter_loop).start();
 	tempSensor->start();
+	thermostat->start();
 }
 
 void counter_loop()
