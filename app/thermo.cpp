@@ -21,6 +21,7 @@ void Thermostat::check()
 	DateTime now = SystemClock.now(eTZ_Local);
 	Serial.print("DateTime: "); Serial.println(now.toFullDateTimeString());
 	SchedUnit daySchedule[maxProg] = _schedule[now.DayofWeek];
+	Serial.print("dayOfWeek: "); Serial.println(now.DayofWeek);
 	float targetTemp;
 	uint16_t nowMinutes = now.Hour * 60 + now.Minute;
 

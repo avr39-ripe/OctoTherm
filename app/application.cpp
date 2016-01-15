@@ -22,7 +22,7 @@ void init()
 	tempSensor = new TempSensorHttp(ActiveConfig.sensorUrl);
 	thermostat = new Thermostat(*tempSensor,"Office", 4000);
 
-	for(uint8_t i = 0; i< maxProg; i++)
+	for(uint8_t i = 0; i< 7; i++)
 	{
 		thermostat->_schedule[i][0].minutes = 0;
 		thermostat->_schedule[i][0].targetTemp = 19;
