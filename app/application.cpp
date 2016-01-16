@@ -7,13 +7,13 @@ unsigned long counter = 0;
 TempSensorHttp *tempSensor;
 Thermostat *thermostat;
 
-NtpClient ntpClient("pool.ntp.org", 120);
+NtpClient ntpClient("pool.ntp.org", 30);
 
 void init()
 {
 	spiffs_mount(); // Mount file system, in order to work with files
 	Serial.begin(SERIAL_BAUD_RATE); // 115200 by default
-	Serial.systemDebugOutput(false);
+	Serial.systemDebugOutput(true);
 	Serial.commandProcessing(false);
 
 	SystemClock.setTimeZone(2);
@@ -42,8 +42,9 @@ void init()
 	if (ActiveConfig.StaEnable)
 	{
 		WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
-		WifiStation.enableDHCP(false);
-		WifiStation.setIP((String)"192.168.31.204", (String)"255.255.255.0", (String)"192.168.31.1");
+//		WifiStation.enableDHCP(false);
+//		WifiStation.setIP((String)"192.168.31.204", (String)"255.255.255.0", (String)"192.168.31.1");
+//		WifiStation.setIP((String)"10.2.113.115", (String)"255.255.255.128", (String)"10.2.113.1");
 		WifiStation.enable(true);
 		WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
 	}
@@ -55,8 +56,8 @@ void init()
 	startWebServer();
 
 	counterTimer.initializeMs(1000, counter_loop).start();
-	tempSensor->start();
-	thermostat->start();
+//	tempSensor->start();
+//	thermostat->start();
 }
 
 void counter_loop()
@@ -67,8 +68,11 @@ void counter_loop()
 void StaConnectOk()
 {
 	Serial.println("connected to AP");
-	WifiAccessPoint.enable(false);
 	ntpClient.requestTime();
+	tempSensor->start();
+	thermostat->start();
+	WifiAccessPoint.enable(false);
+
 }
 
 void StaConnectFail()

@@ -34,11 +34,21 @@ void Thermostat::check()
 		Serial.print("daySchedule[i].minutes: "); Serial.println(daySchedule[i].minutes);
 		Serial.print("daySchedule[nextIdx].minutes: "); Serial.println(daySchedule[nextIdx].minutes);
 
-		if ( (nowMinutes >= daySchedule[i].minutes) && (nowMinutes <= daySchedule[nextIdx].minutes) )
+		bool dayTransit = daySchedule[i].minutes > daySchedule[nextIdx].minutes;
+		Serial.print("dayTransit: "); Serial.println(dayTransit);
+
+		if ( ((!dayTransit) && ((nowMinutes >= daySchedule[i].minutes) && (nowMinutes <= daySchedule[nextIdx].minutes))) )
 		{
-			Serial.print("Idx: "); Serial.println(i);
+			Serial.print("AND Idx: "); Serial.println(i);
 			targetTemp = daySchedule[i].targetTemp;
-			Serial.print("selected targetTemp: "); Serial.println(targetTemp);
+			Serial.print("AND selected targetTemp: "); Serial.println(targetTemp);
+			break;
+		}
+		if ( ((dayTransit) && ((nowMinutes >= daySchedule[i].minutes) || (nowMinutes <= daySchedule[nextIdx].minutes))) )
+		{
+			Serial.print("OR Idx: "); Serial.println(i);
+			targetTemp = daySchedule[i].targetTemp;
+			Serial.print("OR selected targetTemp: "); Serial.println(targetTemp);
 			break;
 		}
 	}

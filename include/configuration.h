@@ -11,7 +11,8 @@ struct ThermConfig
 	ThermConfig()
 	{
 		StaEnable = 1; //Enable WIFI Client
-		sensorUrl = "http://192.168.31.130/state";
+//		sensorUrl = "http://192.168.31.130/state";
+		sensorUrl = "http://10.2.113.114/state";
 	}
 
 	String StaSSID;
