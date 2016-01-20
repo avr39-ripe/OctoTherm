@@ -33,14 +33,17 @@ public:
 //	void setSched(uint8_t wDay, uint8_t progNum, uint16_t minutes, float tergetTemp);
 //	SchedUnit getSched(uint8_t wDay, uint8_t progNum);
 	SchedUnit _schedule[7][maxProg]; // 7 day X maxProg programs in schedule
-	float _targetTempDelta = 0.5;
+	float _targetTempDelta = 0.5; //delta +- for both _targetTemp and manualTargetTemp
 	uint8_t getState() { return _state; };
 	String getDescription() { return _description; };
 private:
 	uint16_t _refresh; // thermostat update interval
 	Timer _refreshTimer; // timer for thermostat update
 	TempSensor *_tempSensor;
+	bool _active; //thermostat active (true), ON,  works, updates, changes its _state or turned OFF
 	bool _state; // thermostat state on (true) or off (false)
+	bool _manual; //thermostat in manual mode (true) or automatic schedule mode (false)
+	float _manualTargetTemp = 20; //target temperature for manual mode
 	String _description; // some text description of thermostat
 };
 
