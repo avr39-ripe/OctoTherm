@@ -101,8 +101,8 @@ uint8_t Thermostat::loadConfig()
 			for (uint8_t prog = 0; prog < maxProg; prog++)
 			{
 				JsonObject& jsonProg = jsonDay.createNestedObject((String)prog);
-				jsonProg["s"] = _schedule[day][prog].start;
-				jsonProg["tt"] = _schedule[day][prog].targetTemp;
+				_schedule[day][prog].start = jsonProg["s"];
+				_schedule[day][prog].targetTemp = jsonProg["tt"];
 
 			}
 		}
