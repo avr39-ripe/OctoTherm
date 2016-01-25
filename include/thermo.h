@@ -26,7 +26,7 @@ struct SchedUnit
 class Thermostat
 {
 public:
-	Thermostat(TempSensor &tempSensor, String description = "Thermostat", uint16_t refresh = 4000);
+	Thermostat(TempSensor &tempSensor, String name = "Thermostat", uint16_t refresh = 4000);
 	void start();
 	void stop();
 	void check();
@@ -35,7 +35,7 @@ public:
 	SchedUnit _schedule[7][maxProg]; // 7 day X maxProg programs in schedule
 	float _targetTempDelta = 0.5; //delta +- for both _targetTemp and manualTargetTemp
 	uint8_t getState() { return _state; };
-	String getDescription() { return _description; };
+	String getDescription() { return _name; };
 private:
 	uint16_t _refresh; // thermostat update interval
 	Timer _refreshTimer; // timer for thermostat update
@@ -44,7 +44,7 @@ private:
 	bool _state; // thermostat state on (true) or off (false)
 	bool _manual; //thermostat in manual mode (true) or automatic schedule mode (false)
 	float _manualTargetTemp = 20; //target temperature for manual mode
-	String _description; // some text description of thermostat
+	String _name; // some text description of thermostat
 };
 
 

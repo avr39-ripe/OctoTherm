@@ -7,10 +7,10 @@
 
 #include <octotherm.h>
 
-Thermostat::Thermostat( TempSensor &tempSensor, String description, uint16_t refresh)
+Thermostat::Thermostat( TempSensor &tempSensor, String name, uint16_t refresh)
 {
 	_tempSensor = &tempSensor;
-	_description = description;
+	_name = name;
 	_refresh = refresh;
 	_state = false;
 }
