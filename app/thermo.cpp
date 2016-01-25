@@ -31,20 +31,20 @@ void Thermostat::check()
 		uint8_t nextIdx = i < (maxProg - 1) ? i + 1 : 0;
 		Serial.print("nextIdx: "); Serial.println(nextIdx);
 		Serial.print("nowMinutes: "); Serial.println(nowMinutes);
-		Serial.print("daySchedule[i].minutes: "); Serial.println(daySchedule[i].minutes);
-		Serial.print("daySchedule[nextIdx].minutes: "); Serial.println(daySchedule[nextIdx].minutes);
+		Serial.print("daySchedule[i].minutes: "); Serial.println(daySchedule[i].start);
+		Serial.print("daySchedule[nextIdx].minutes: "); Serial.println(daySchedule[nextIdx].start);
 
-		bool dayTransit = daySchedule[i].minutes > daySchedule[nextIdx].minutes;
+		bool dayTransit = daySchedule[i].start > daySchedule[nextIdx].start;
 		Serial.print("dayTransit: "); Serial.println(dayTransit);
 
-		if ( ((!dayTransit) && ((nowMinutes >= daySchedule[i].minutes) && (nowMinutes <= daySchedule[nextIdx].minutes))) )
+		if ( ((!dayTransit) && ((nowMinutes >= daySchedule[i].start) && (nowMinutes <= daySchedule[nextIdx].start))) )
 		{
 			Serial.print("AND Idx: "); Serial.println(i);
 			targetTemp = daySchedule[i].targetTemp;
 			Serial.print("AND selected targetTemp: "); Serial.println(targetTemp);
 			break;
 		}
-		if ( ((dayTransit) && ((nowMinutes >= daySchedule[i].minutes) || (nowMinutes <= daySchedule[nextIdx].minutes))) )
+		if ( ((dayTransit) && ((nowMinutes >= daySchedule[i].start) || (nowMinutes <= daySchedule[nextIdx].start))) )
 		{
 			Serial.print("OR Idx: "); Serial.println(i);
 			targetTemp = daySchedule[i].targetTemp;

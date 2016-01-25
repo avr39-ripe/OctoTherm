@@ -29,13 +29,13 @@ void init()
 
 	for(uint8_t i = 0; i< 7; i++)
 	{
-		thermostat->_schedule[i][0].minutes = 1439;
+		thermostat->_schedule[i][0].start = 1439;
 		thermostat->_schedule[i][0].targetTemp = 19;
-		thermostat->_schedule[i][1].minutes = 420;
+		thermostat->_schedule[i][1].start = 420;
 		thermostat->_schedule[i][1].targetTemp = 25;
-		thermostat->_schedule[i][2].minutes = 1200;
+		thermostat->_schedule[i][2].start = 1200;
 		thermostat->_schedule[i][2].targetTemp = 22;
-		thermostat->_schedule[i][3].minutes = 1380;
+		thermostat->_schedule[i][3].start = 1380;
 		thermostat->_schedule[i][3].targetTemp = 23;
 	}
 

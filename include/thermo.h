@@ -16,10 +16,10 @@ struct SchedUnit
 {
 	SchedUnit()
 	{
-		minutes = 0;
+		start = 0;
 		targetTemp = 0;
 	}
-	uint16_t minutes; // scheduled interval start in minutes since 0:00
+	uint16_t start; // scheduled interval start in minutes since 0:00
 	float targetTemp; // target temperature for this interval
 };
 
