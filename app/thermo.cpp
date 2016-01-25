@@ -93,15 +93,18 @@ uint8_t Thermostat::loadConfig()
 		_manualTargetTemp = jsonThermostat["manualTargetTemp"];
 		_targetTempDelta = jsonThermostat["targetTempDelta"];
 
-		JsonArray& jsonSchedule = root.createNestedArray("schedule");
+		JsonObject& jsonSchedule = root.createNestedObject("schedule");
 
 		for (uint8_t day = 0; day < 7; day++)
 		{
-//			JsonArray& jsonProg = jsonSchedule.
-//			for (uint8_t prog = 0; prog < maxProg; prog++)
-//			{
-//
-//			}
+			JsonObject& jsonDay = jsonSchedule.createNestedObject((String)day);
+			for (uint8_t prog = 0; prog < maxProg; prog++)
+			{
+				JsonObject& jsonProg = jsonDay.createNestedObject((String)prog);
+				jsonProg["s"] = _schedule[day][prog].start;
+				jsonProg["tt"] = _schedule[day][prog].targetTemp;
+
+			}
 		}
 
 
