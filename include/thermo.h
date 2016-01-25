@@ -11,6 +11,8 @@
 #include <tempsensor.h>
 
 const uint8_t maxProg = 4 ;
+const uint16_t thermostatConfJsonBufSize = 1024;
+const uint16_t thermostatConfFileBufSize = 4096;
 
 struct SchedUnit
 {
@@ -30,21 +32,24 @@ public:
 	void start();
 	void stop();
 	void check();
+	uint8_t saveConfig();
+	uint8_t loadConfig();
+
 //	void setSched(uint8_t wDay, uint8_t progNum, uint16_t minutes, float tergetTemp);
 //	SchedUnit getSched(uint8_t wDay, uint8_t progNum);
 	SchedUnit _schedule[7][maxProg]; // 7 day X maxProg programs in schedule
-	float _targetTempDelta = 0.5; //delta +- for both _targetTemp and manualTargetTemp
 	uint8_t getState() { return _state; };
 	String getDescription() { return _name; };
 private:
-	uint16_t _refresh; // thermostat update interval
-	Timer _refreshTimer; // timer for thermostat update
-	TempSensor *_tempSensor;
+	String _name; // some text description of thermostat
 	bool _active; //thermostat active (true), ON,  works, updates, changes its _state or turned OFF
 	bool _state; // thermostat state on (true) or off (false)
 	bool _manual; //thermostat in manual mode (true) or automatic schedule mode (false)
 	float _manualTargetTemp = 20; //target temperature for manual mode
-	String _name; // some text description of thermostat
+	float _targetTempDelta = 0.5; //delta +- for both _targetTemp and manualTargetTemp
+	uint16_t _refresh; // thermostat update interval
+	Timer _refreshTimer; // timer for thermostat update
+	TempSensor *_tempSensor;
 };
 
 

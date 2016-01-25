@@ -13,6 +13,8 @@ Thermostat::Thermostat( TempSensor &tempSensor, String name, uint16_t refresh)
 	_name = name;
 	_refresh = refresh;
 	_state = false;
+	_manual = false;
+	_active = true;
 }
 
 void Thermostat::check()
@@ -72,3 +74,43 @@ void Thermostat::stop()
 //	_tempSensor->stop();
 }
 
+uint8_t Thermostat::loadConfig()
+{
+	StaticJsonBuffer<thermostatConfJsonBufSize> jsonBuffer;
+
+	if (fileExist(".zone" + _name + ".conf"))
+	{
+		int size = fileGetSize(".zone" + _name + ".conf");
+		char* jsonString = new char[size + 1];
+		fileGetContent(".zone" + _name + ".conf", jsonString, size + 1);
+		JsonObject& root = jsonBuffer.parseObject(jsonString);
+
+		JsonObject& jsonThermostat = root["thermostat"];
+		_name = String((const char*)jsonThermostat["name"]);
+		_active = jsonThermostat["active"];
+		_state = jsonThermostat["state"];
+		_manual = jsonThermostat["manual"];
+		_manualTargetTemp = jsonThermostat["manualTargetTemp"];
+		_targetTempDelta = jsonThermostat["targetTempDelta"];
+
+		JsonArray& jsonSchedule = root.createNestedArray("schedule");
+
+		for (uint8_t day = 0; day < 7; day++)
+		{
+//			JsonArray& jsonProg = jsonSchedule.
+//			for (uint8_t prog = 0; prog < maxProg; prog++)
+//			{
+//
+//			}
+		}
+
+
+		delete[] jsonString;
+	}
+	return 0;
+}
+
+uint8_t Thermostat::saveConfig()
+{
+	return 0;
+}
