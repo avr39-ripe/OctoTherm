@@ -39,6 +39,24 @@ void init()
 		thermostat->_schedule[i][3].targetTemp = 23;
 	}
 
+	//JSONIFy test
+	StaticJsonBuffer<4096> jsonBuffer;
+	JsonObject& root = jsonBuffer.createObject();
+	JsonObject& schedule = root.createNestedObject("schedule");
+	root["schedule"] = schedule;
+	for (uint8_t day = 0; day < 7; day++)
+			{
+				JsonObject& jsonDay = schedule.createNestedObject((String)day);
+				for (uint8_t prog = 0; prog < maxProg; prog++)
+				{
+					JsonObject& jsonProg = jsonDay.createNestedObject((String)prog);
+					jsonProg["s"] = thermostat->_schedule[day][prog].start;
+					jsonProg["tt"] = thermostat->_schedule[day][prog].targetTemp;
+
+				}
+			}
+	root.prettyPrintTo(Serial);
+
 	if (ActiveConfig.StaEnable)
 	{
 		WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
