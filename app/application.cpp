@@ -42,18 +42,20 @@ void init()
 	//JSONIFy test
 	StaticJsonBuffer<4096> jsonBuffer;
 	JsonObject& root = jsonBuffer.createObject();
-	JsonObject& schedule = root.createNestedObject("schedule");
-	root["schedule"] = schedule;
+//	JsonObject& schedule = root.createNestedObject("schedule");
+//	root["schedule"] = schedule;
 	for (uint8_t day = 0; day < 7; day++)
 			{
-				JsonObject& jsonDay = schedule.createNestedObject((String)day);
+				JsonArray& jsonDay = root.createNestedArray((String)day);
+				//root[(String)day] = jsonDay;
 				for (uint8_t prog = 0; prog < maxProg; prog++)
 				{
-					JsonObject& jsonProg = jsonDay.createNestedObject((String)prog);
+					JsonObject& jsonProg = jsonBuffer.createObject();
 					jsonProg["s"] = thermostat->_schedule[day][prog].start;
 					jsonProg["tt"] = thermostat->_schedule[day][prog].targetTemp;
-
+					jsonDay.add(jsonProg);
 				}
+				//root[(String)day] =
 			}
 	root.prettyPrintTo(Serial);
 
