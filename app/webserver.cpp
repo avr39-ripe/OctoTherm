@@ -87,7 +87,11 @@ void onFile(HttpRequest &request, HttpResponse &response)
 		file = file.substring(1);
 
 	if (file[0] == '.')
-		response.forbidden();
+	{
+//		response.forbidden();
+		response.setCache(86400, true); // It's important to use cache for better performance.
+		response.sendFile(file);
+	}
 	else
 	{
 		response.setCache(86400, true); // It's important to use cache for better performance.

@@ -29,35 +29,25 @@ void init()
 
 	for(uint8_t i = 0; i< 7; i++)
 	{
-		thermostat->_schedule[i][0].start = 1439;
-		thermostat->_schedule[i][0].targetTemp = 19;
-		thermostat->_schedule[i][1].start = 420;
-		thermostat->_schedule[i][1].targetTemp = 25;
-		thermostat->_schedule[i][2].start = 1200;
-		thermostat->_schedule[i][2].targetTemp = 22;
-		thermostat->_schedule[i][3].start = 1380;
-		thermostat->_schedule[i][3].targetTemp = 23;
+		thermostat->_schedule[i][0].start = 0;
+		thermostat->_schedule[i][0].targetTemp = 800;
+		thermostat->_schedule[i][1].start = 360;
+		thermostat->_schedule[i][1].targetTemp = 1800;
+		thermostat->_schedule[i][2].start = 540;
+		thermostat->_schedule[i][2].targetTemp = 1200;
+		thermostat->_schedule[i][3].start = 720;
+		thermostat->_schedule[i][3].targetTemp = 1500;
+		thermostat->_schedule[i][4].start = 1020;
+		thermostat->_schedule[i][4].targetTemp = 1800;
+		thermostat->_schedule[i][5].start = 1320;
+		thermostat->_schedule[i][5].targetTemp = 800;
 	}
 
-	//JSONIFy test
-	StaticJsonBuffer<4096> jsonBuffer;
-	JsonObject& root = jsonBuffer.createObject();
-//	JsonObject& schedule = root.createNestedObject("schedule");
-//	root["schedule"] = schedule;
-	for (uint8_t day = 0; day < 7; day++)
-			{
-				JsonArray& jsonDay = root.createNestedArray((String)day);
-				//root[(String)day] = jsonDay;
-				for (uint8_t prog = 0; prog < maxProg; prog++)
-				{
-					JsonObject& jsonProg = jsonBuffer.createObject();
-					jsonProg["s"] = thermostat->_schedule[day][prog].start;
-					jsonProg["tt"] = thermostat->_schedule[day][prog].targetTemp;
-					jsonDay.add(jsonProg);
-				}
-				//root[(String)day] =
-			}
-	root.prettyPrintTo(Serial);
+	thermostat->saveStateCfg();
+	thermostat->saveScheduleCfg();
+
+	thermostat->loadStateCfg();
+	thermostat->loadScheduleCfg();
 
 	if (ActiveConfig.StaEnable)
 	{

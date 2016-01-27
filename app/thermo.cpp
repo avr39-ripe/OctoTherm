@@ -42,22 +42,22 @@ void Thermostat::check()
 		if ( ((!dayTransit) && ((nowMinutes >= daySchedule[i].start) && (nowMinutes <= daySchedule[nextIdx].start))) )
 		{
 			Serial.print("AND Idx: "); Serial.println(i);
-			targetTemp = daySchedule[i].targetTemp;
+			targetTemp = (float)daySchedule[i].targetTemp / 100.0; //in-place convert to float
 			Serial.print("AND selected targetTemp: "); Serial.println(targetTemp);
 			break;
 		}
 		if ( ((dayTransit) && ((nowMinutes >= daySchedule[i].start) || (nowMinutes <= daySchedule[nextIdx].start))) )
 		{
 			Serial.print("OR Idx: "); Serial.println(i);
-			targetTemp = daySchedule[i].targetTemp;
+			targetTemp = (float)daySchedule[i].targetTemp / 100.0; //in-place convert to float
 			Serial.print("OR selected targetTemp: "); Serial.println(targetTemp);
 			break;
 		}
 	}
 	Serial.print("targetTemp: "); Serial.println(targetTemp);
-	if (currTemp >= targetTemp + _targetTempDelta)
+	if (currTemp >= targetTemp + (_targetTempDelta / 100))
 		_state = false;
-	if (currTemp <= targetTemp - _targetTempDelta)
+	if (currTemp <= targetTemp - (_targetTempDelta / 100))
 		_state = true;
 	Serial.printf("State: %s\n", _state ? "true" : "false");
 }
@@ -74,46 +74,100 @@ void Thermostat::stop()
 //	_tempSensor->stop();
 }
 
-uint8_t Thermostat::loadConfig()
+uint8_t Thermostat::loadStateCfg()
 {
-	StaticJsonBuffer<thermostatConfJsonBufSize> jsonBuffer;
+	StaticJsonBuffer<stateJsonBufSize> jsonBuffer;
 
-	if (fileExist(".zone" + _name + ".conf"))
+	if (fileExist(".state" + _name))
 	{
-		int size = fileGetSize(".zone" + _name + ".conf");
+		int size = fileGetSize(".state" + _name);
 		char* jsonString = new char[size + 1];
-		fileGetContent(".zone" + _name + ".conf", jsonString, size + 1);
+		fileGetContent(".state" + _name, jsonString, size + 1);
 		JsonObject& root = jsonBuffer.parseObject(jsonString);
 
-		JsonObject& jsonThermostat = root["thermostat"];
-		_name = String((const char*)jsonThermostat["name"]);
-		_active = jsonThermostat["active"];
-		_state = jsonThermostat["state"];
-		_manual = jsonThermostat["manual"];
-		_manualTargetTemp = jsonThermostat["manualTargetTemp"];
-		_targetTempDelta = jsonThermostat["targetTempDelta"];
+//		JsonObject& jsonThermostat = root["thermostat"];
+		_name = String((const char*)root["name"]);
+		_active = root["active"];
+//		_state = root["state"];
+		_manual = root["manual"];
+		_manualTargetTemp = root["manualTargetTemp"];
+		_targetTempDelta = root["targetTempDelta"];
 
-		JsonObject& jsonSchedule = root.createNestedObject("schedule");
-
-		for (uint8_t day = 0; day < 7; day++)
-		{
-			JsonObject& jsonDay = jsonSchedule.createNestedObject((String)day);
-			for (uint8_t prog = 0; prog < maxProg; prog++)
-			{
-				JsonObject& jsonProg = jsonDay.createNestedObject((String)prog);
-				_schedule[day][prog].start = jsonProg["s"];
-				_schedule[day][prog].targetTemp = jsonProg["tt"];
-
-			}
-		}
-
-
+		Serial.printf("Name: %s, Active: %d, Manual: %d, ManualTT: %d, TTDelta: %d\n",_name.c_str(),_active,_manual,_manualTargetTemp, _targetTempDelta);
 		delete[] jsonString;
+		return 0;
 	}
+
+}
+
+uint8_t Thermostat::saveStateCfg()
+{
+	StaticJsonBuffer<stateJsonBufSize> jsonBuffer;
+	JsonObject& root = jsonBuffer.createObject();
+
+	root["name"] = _name.c_str();
+	root["active"] = _active;
+	root["manual"] = _manual;
+	root["manualTargetTemp"] = _manualTargetTemp;
+	root["targetTempDelta"] = _targetTempDelta;
+
+	root.prettyPrintTo(Serial);
+
+	char buf[stateFileBufSize];
+	root.printTo(buf, sizeof(buf));
+	fileSetContent(".state" + _name, buf);
+
 	return 0;
 }
 
-uint8_t Thermostat::saveConfig()
+uint8_t Thermostat::loadScheduleCfg()
 {
+	StaticJsonBuffer<scheduleJsonBufSize> jsonBuffer;
+
+	if (fileExist(".sched" + _name))
+	{
+		int size = fileGetSize(".sched" + _name);
+		char* jsonString = new char[size + 1];
+		fileGetContent(".sched" + _name, jsonString, size + 1);
+		JsonObject& root = jsonBuffer.parseObject(jsonString);
+
+		for (uint8_t day = 0; day < 7; day++)
+			{
+		//			auto jsonDay = root[(String)day];
+			Serial.printf("%d: ", day);
+				for (uint8_t prog = 0; prog < maxProg; prog++)
+				{
+					_schedule[day][prog].start = root[(String)day][prog]["s"];
+					_schedule[day][prog].targetTemp = root[(String)day][prog]["tt"];
+					Serial.printf("{s: %d,tt: %d}", _schedule[day][prog].start, _schedule[day][prog].targetTemp);
+		//				JsonObject& jsonProg = jsonBuffer.createObject();
+		//				jsonProg["s"] = _schedule[day][prog].start;
+		//				jsonProg["tt"] = _schedule[day][prog].targetTemp;
+		//				jsonDay.add(jsonProg);
+				}
+				Serial.println();
+			}
+	}
 	return 0;
+}
+uint8_t Thermostat::saveScheduleCfg()
+{
+	StaticJsonBuffer<scheduleJsonBufSize> jsonBuffer;
+	JsonObject& root = jsonBuffer.createObject();
+	for (uint8_t day = 0; day < 7; day++)
+	{
+		JsonArray& jsonDay = root.createNestedArray((String)day);
+		for (uint8_t prog = 0; prog < maxProg; prog++)
+		{
+			JsonObject& jsonProg = jsonBuffer.createObject();
+			jsonProg["s"] = _schedule[day][prog].start;
+			jsonProg["tt"] = _schedule[day][prog].targetTemp;
+			jsonDay.add(jsonProg);
+		}
+	}
+	root.prettyPrintTo(Serial);
+
+	char buf[scheduleFileBufSize];
+	root.printTo(buf, sizeof(buf));
+	fileSetContent(".sched" + _name, buf);
 }
