@@ -111,6 +111,16 @@ void onAJAXGetState(HttpRequest &request, HttpResponse &response)
 }
 
 
+void onStateJson(HttpRequest &request, HttpResponse &response)
+{
+	thermostat->sendStateCfg(request,response);
+}
+
+void onScheduleJson(HttpRequest &request, HttpResponse &response)
+{
+	thermostat->sendScheduleCfg(request,response);
+}
+
 void startWebServer()
 {
 	if (serverStarted) return;
@@ -120,6 +130,8 @@ void startWebServer()
 	server.addPath("/config", onConfiguration);
 	server.addPath("/config.json", onConfiguration_json);
 	server.addPath("/state", onAJAXGetState);
+	server.addPath("/state.json", onStateJson);
+	server.addPath("/schedule.json", onScheduleJson);
 	server.setDefaultHandler(onFile);
 	serverStarted = true;
 

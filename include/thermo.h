@@ -39,8 +39,10 @@ public:
 	String stateCfgToJson(); //convert state-part cfg to json-String
 	void jsonToScheduleCfg(String json); //convert json-string to schedule-part config
 	String scheduleCfgToJson(); //convert schedule-part cfg to json-String
+	void sendStateCfg(HttpRequest &request, HttpResponse &response);
 	uint8_t saveStateCfg();
 	uint8_t loadStateCfg();
+	void sendScheduleCfg(HttpRequest &request, HttpResponse &response);
 	uint8_t saveScheduleCfg();
 	uint8_t loadScheduleCfg();
 

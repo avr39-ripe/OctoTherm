@@ -99,6 +99,19 @@ uint8_t Thermostat::loadStateCfg()
 	}
 
 }
+void Thermostat::sendStateCfg(HttpRequest &request, HttpResponse &response)
+{
+	JsonObjectStream* stream = new JsonObjectStream();
+	JsonObject& json = stream->getRoot();
+
+	json["name"] = _name;
+	json["active"] = _active;
+	json["manual"] = _manual;
+	json["manualTargetTemp"] = _manualTargetTemp;
+	json["targetTempDelta"] = _targetTempDelta;
+
+	response.sendJsonObject(stream);
+}
 
 uint8_t Thermostat::saveStateCfg()
 {
@@ -133,22 +146,52 @@ uint8_t Thermostat::loadScheduleCfg()
 
 		for (uint8_t day = 0; day < 7; day++)
 			{
-		//			auto jsonDay = root[(String)day];
 			Serial.printf("%d: ", day);
 				for (uint8_t prog = 0; prog < maxProg; prog++)
 				{
 					_schedule[day][prog].start = root[(String)day][prog]["s"];
 					_schedule[day][prog].targetTemp = root[(String)day][prog]["tt"];
 					Serial.printf("{s: %d,tt: %d}", _schedule[day][prog].start, _schedule[day][prog].targetTemp);
-		//				JsonObject& jsonProg = jsonBuffer.createObject();
-		//				jsonProg["s"] = _schedule[day][prog].start;
-		//				jsonProg["tt"] = _schedule[day][prog].targetTemp;
-		//				jsonDay.add(jsonProg);
 				}
 				Serial.println();
 			}
 	}
 	return 0;
+}
+
+void Thermostat::sendScheduleCfg(HttpRequest &request, HttpResponse &response)
+{
+//	StaticJsonBuffer<scheduleJsonBufSize> jsonBuffer;
+//	JsonObjectStream* stream = new JsonObjectStream();
+//	JsonObject& json = stream->getRoot();
+//
+//	for (uint8_t day = 0; day < 7; day++)
+//	{
+//		JsonArray& jsonDay = json.createNestedArray((String)day);
+//		for (uint8_t prog = 0; prog < maxProg; prog++)
+//		{
+//			JsonObject& jsonProg = jsonBuffer.createObject();
+//			jsonProg["s"] = _schedule[day][prog].start;
+//			jsonProg["tt"] = _schedule[day][prog].targetTemp;
+//			jsonDay.add(jsonProg);
+//		}
+//	}
+	StaticJsonBuffer<scheduleJsonBufSize> jsonBuffer;
+		JsonObject& root = jsonBuffer.createObject();
+		for (uint8_t day = 0; day < 7; day++)
+		{
+			JsonArray& jsonDay = root.createNestedArray((String)day);
+			for (uint8_t prog = 0; prog < maxProg; prog++)
+			{
+				JsonObject& jsonProg = jsonBuffer.createObject();
+				jsonProg["s"] = _schedule[day][prog].start;
+				jsonProg["tt"] = _schedule[day][prog].targetTemp;
+				jsonDay.add(jsonProg);
+			}
+		}
+	char buf[scheduleFileBufSize];
+	root.printTo(buf, sizeof(buf));
+	response.sendString(buf);
 }
 uint8_t Thermostat::saveScheduleCfg()
 {
