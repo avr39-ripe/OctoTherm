@@ -191,6 +191,9 @@ void Thermostat::sendScheduleCfg(HttpRequest &request, HttpResponse &response)
 		}
 	char buf[scheduleFileBufSize];
 	root.printTo(buf, sizeof(buf));
+
+	response.setHeader("Access-Control-Allow-Origin", "*");
+	response.setContentType(ContentType::JSON);
 	response.sendString(buf);
 }
 uint8_t Thermostat::saveScheduleCfg()
