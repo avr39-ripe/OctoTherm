@@ -35,7 +35,7 @@ public:
 	void start();
 	void stop();
 	void check();
-	void sendStateCfg(HttpRequest &request, HttpResponse &response);
+	void onStateCfg(HttpRequest &request, HttpResponse &response);
 	uint8_t saveStateCfg();
 	uint8_t loadStateCfg();
 	void sendScheduleCfg(HttpRequest &request, HttpResponse &response);
@@ -53,7 +53,7 @@ private:
 	bool _state; // thermostat state on (true) or off (false)
 	bool _manual; //thermostat in manual mode (true) or automatic schedule mode (false)
 	uint16_t _manualTargetTemp = 2000; //target temperature for manual mode MULTIPLE BY 100
-	uint16_t _targetTempDelta = 500; //delta +- for both _targetTemp and manualTargetTemp MULTIPLE BY 100
+	uint16_t _targetTempDelta = 50; //delta +- for both _targetTemp and manualTargetTemp MULTIPLE BY 100
 	uint16_t _refresh; // thermostat update interval
 	Timer _refreshTimer; // timer for thermostat update
 	TempSensor *_tempSensor;

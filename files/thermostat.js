@@ -38,7 +38,7 @@ var thermostat = {
 	temperature: "22.00",
 	manual: 0,
     manualTargetTemp: 2100,
-    targetTempDelta: 500
+    targetTempDelta: 50
 };
 
 var schedule = {};
@@ -599,8 +599,9 @@ function onThermostatStateButton() {
     	thermostatStateButton.style.backgroundColor = "#555";
     }
 
+	ajaxSaveState("active");
     //save("tx/heating",thermostat.state+","+parseInt(setpoint*100));
-    save("thermostat_state", thermostat.active.toString());
+//    save("thermostat_state", thermostat.active.toString());
 }
 
 function onSetPointDec(){
@@ -611,9 +612,11 @@ function onSetPointDec(){
 	document.getElementById('scheduled_thermostat').style.backgroundColor = "#555";
 	document.getElementById('manual_thermostat').style.backgroundColor = "#ff9600";
 	document.getElementById('zone-setpoint').innerHTML = setpoint.toFixed(1) + unit;
-	
-	save("thermostat_mode", thermostat.manual.toString());
-    save("thermostat_manualsetpoint", ((thermostat.manualTargetTemp.toFixed(1)) * 100).toString());
+
+	ajaxSaveState("manual");
+	ajaxSaveState("manualTargetTemp");
+//	save("thermostat_mode", thermostat.manual.toString());
+//    save("thermostat_manualsetpoint", ((thermostat.manualTargetTemp.toFixed(1)) * 100).toString());
 }
 
 function onSetPointInc(){
@@ -625,8 +628,10 @@ function onSetPointInc(){
 	document.getElementById('manual_thermostat').style.backgroundColor = "#ff9600";
 	document.getElementById('zone-setpoint').innerHTML = setpoint.toFixed(1) + unit;
 	
-	save("thermostat_mode", thermostat.manual.toString());
-    save("thermostat_manualsetpoint", ((thermostat.manualTargetTemp.toFixed(1)) * 100).toString());
+	ajaxSaveState("manual");
+	ajaxSaveState("manualTargetTemp");
+//	save("thermostat_mode", thermostat.manual.toString());
+//    save("thermostat_manualsetpoint", ((thermostat.manualTargetTemp.toFixed(1)) * 100).toString());
 }
 
 function onManualThermostat() {
@@ -637,7 +642,8 @@ function onManualThermostat() {
 	document.getElementById('manual_thermostat').style.backgroundColor = "#ff9600";
 	document.getElementById('zone-setpoint').innerHTML = setpoint.toFixed(1) + unit;
 	
-	save("thermostat_mode", (thermostat.manual).toString());
+//	save("thermostat_mode", (thermostat.manual).toString());
+	ajaxSaveState("manual");
     updateclock();
 }
 
@@ -647,7 +653,8 @@ function onScheduledThermostat() {
 	document.getElementById('manual_thermostat').style.backgroundColor = "#555";
 	document.getElementById('scheduled_thermostat').style.backgroundColor = "#ff9600";
 	
-	save("thermostat_mode", (thermostat.manual).toString());
+//	save("thermostat_mode", (thermostat.manual).toString());
+	ajaxSaveState("manual");
     updateclock();
 }
 
@@ -735,6 +742,20 @@ function ajaxGetAllState() {
 	    }
 	}
 }
+
+function ajaxSaveState(key) {
+	
+	var xhr = new XMLHttpRequest();
+
+	xhr.open('POST', '/state.json', true);
+	xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8')
+	
+	var json = {};
+	json[key] = thermostat[key];
+	
+	xhr.send(JSON.stringify(json));
+}
+
 //Here we put some initial code which starts after DOM loaded
 function onDocumentRedy() {
 	//Attach eventListeners
@@ -747,18 +768,17 @@ function onDocumentRedy() {
 	//Init
 	//schedule = server_get2("thermostat_schedule"); //all data * 100 to avoid floating point on the ESP8266 side
 	ajaxGetSchedule();
-
 	scheduleToFloat();
 	
 	ajaxGetAllState()
 	
-	update();
-	updateclock();
+//	update();
+//	updateclock();
 	
 	setInterval(ajaxGetState, 5000);
 	setInterval(updateclock, 1000);
 	
-	for (day in schedule) draw_day_slider(day);
+//	for (day in schedule) draw_day_slider(day);
 }
 
 document.addEventListener('DOMContentLoaded', onDocumentRedy);

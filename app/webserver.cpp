@@ -113,7 +113,7 @@ void onAJAXGetState(HttpRequest &request, HttpResponse &response)
 
 void onStateJson(HttpRequest &request, HttpResponse &response)
 {
-	thermostat->sendStateCfg(request,response);
+	thermostat->onStateCfg(request,response);
 }
 
 void onScheduleJson(HttpRequest &request, HttpResponse &response)

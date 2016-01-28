@@ -13,7 +13,7 @@ void init()
 {
 	spiffs_mount(); // Mount file system, in order to work with files
 	Serial.begin(SERIAL_BAUD_RATE); // 115200 by default
-	Serial.systemDebugOutput(true);
+	Serial.systemDebugOutput(false);
 	Serial.commandProcessing(false);
 
 	SystemClock.setTimeZone(2);
@@ -43,8 +43,8 @@ void init()
 		thermostat->_schedule[i][5].targetTemp = 800;
 	}
 
-	thermostat->saveStateCfg();
-	thermostat->saveScheduleCfg();
+//	thermostat->saveStateCfg();
+//	thermostat->saveScheduleCfg();
 
 	thermostat->loadStateCfg();
 	thermostat->loadScheduleCfg();

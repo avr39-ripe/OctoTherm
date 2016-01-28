@@ -20,44 +20,59 @@ Thermostat::Thermostat( TempSensor &tempSensor, String name, uint16_t refresh)
 void Thermostat::check()
 {
 	float currTemp = _tempSensor->getTemp();
-	DateTime now = SystemClock.now(eTZ_Local);
-	Serial.print("DateTime: "); Serial.println(now.toFullDateTimeString());
-	SchedUnit daySchedule[maxProg] = _schedule[now.DayofWeek];
-	Serial.print("dayOfWeek: "); Serial.println(now.DayofWeek);
 	float targetTemp = 0;
-	uint16_t nowMinutes = now.Hour * 60 + now.Minute;
 
-	for (uint8_t i = 0; i < maxProg; i++)
+	if (!_active)
 	{
-		Serial.print("I: "); Serial.println(i);
-		uint8_t nextIdx = i < (maxProg - 1) ? i + 1 : 0;
-		Serial.print("nextIdx: "); Serial.println(nextIdx);
-		Serial.print("nowMinutes: "); Serial.println(nowMinutes);
-		Serial.print("daySchedule[i].minutes: "); Serial.println(daySchedule[i].start);
-		Serial.print("daySchedule[nextIdx].minutes: "); Serial.println(daySchedule[nextIdx].start);
+		Serial.println("active = false");
+		_state = false;
+		return;
+	}
+	if (_manual)
+	{
+		targetTemp = float(_manualTargetTemp / 100.0);
+	}
+	else
+	{
+		DateTime now = SystemClock.now(eTZ_Local);
+		Serial.print("DateTime: "); Serial.println(now.toFullDateTimeString());
+		SchedUnit daySchedule[maxProg] = _schedule[now.DayofWeek];
+		Serial.print("dayOfWeek: "); Serial.println(now.DayofWeek);
+		uint16_t nowMinutes = now.Hour * 60 + now.Minute;
 
-		bool dayTransit = daySchedule[i].start > daySchedule[nextIdx].start;
-		Serial.print("dayTransit: "); Serial.println(dayTransit);
+		for (uint8_t i = 0; i < maxProg; i++)
+		{
+			Serial.print("I: "); Serial.println(i);
+			uint8_t nextIdx = i < (maxProg - 1) ? i + 1 : 0;
+			Serial.print("nextIdx: "); Serial.println(nextIdx);
+			Serial.print("nowMinutes: "); Serial.println(nowMinutes);
+			Serial.print("daySchedule[i].minutes: "); Serial.println(daySchedule[i].start);
+			Serial.print("daySchedule[nextIdx].minutes: "); Serial.println(daySchedule[nextIdx].start);
 
-		if ( ((!dayTransit) && ((nowMinutes >= daySchedule[i].start) && (nowMinutes <= daySchedule[nextIdx].start))) )
-		{
-			Serial.print("AND Idx: "); Serial.println(i);
-			targetTemp = (float)daySchedule[i].targetTemp / 100.0; //in-place convert to float
-			Serial.print("AND selected targetTemp: "); Serial.println(targetTemp);
-			break;
-		}
-		if ( ((dayTransit) && ((nowMinutes >= daySchedule[i].start) || (nowMinutes <= daySchedule[nextIdx].start))) )
-		{
-			Serial.print("OR Idx: "); Serial.println(i);
-			targetTemp = (float)daySchedule[i].targetTemp / 100.0; //in-place convert to float
-			Serial.print("OR selected targetTemp: "); Serial.println(targetTemp);
-			break;
+			bool dayTransit = daySchedule[i].start > daySchedule[nextIdx].start;
+			Serial.print("dayTransit: "); Serial.println(dayTransit);
+
+			if ( ((!dayTransit) && ((nowMinutes >= daySchedule[i].start) && (nowMinutes <= daySchedule[nextIdx].start))) )
+			{
+				Serial.print("AND Idx: "); Serial.println(i);
+				targetTemp = (float)daySchedule[i].targetTemp / 100.0; //in-place convert to float
+				Serial.print("AND selected targetTemp: "); Serial.println(targetTemp);
+				break;
+			}
+			if ( ((dayTransit) && ((nowMinutes >= daySchedule[i].start) || (nowMinutes <= daySchedule[nextIdx].start))) )
+			{
+				Serial.print("OR Idx: "); Serial.println(i);
+				targetTemp = (float)daySchedule[i].targetTemp / 100.0; //in-place convert to float
+				Serial.print("OR selected targetTemp: "); Serial.println(targetTemp);
+				break;
+			}
 		}
 	}
 	Serial.print("targetTemp: "); Serial.println(targetTemp);
-	if (currTemp >= targetTemp + (_targetTempDelta / 100))
+	Serial.print("targetTempDelta: "); Serial.println((float)(_targetTempDelta / 100.0));
+	if (currTemp >= targetTemp + (float)(_targetTempDelta / 100.0))
 		_state = false;
-	if (currTemp <= targetTemp - (_targetTempDelta / 100))
+	if (currTemp <= targetTemp - (float)(_targetTempDelta / 100.0))
 		_state = true;
 	Serial.printf("State: %s\n", _state ? "true" : "false");
 }
@@ -97,21 +112,63 @@ uint8_t Thermostat::loadStateCfg()
 	}
 
 }
-void Thermostat::sendStateCfg(HttpRequest &request, HttpResponse &response)
+void Thermostat::onStateCfg(HttpRequest &request, HttpResponse &response)
 {
-	JsonObjectStream* stream = new JsonObjectStream();
-	JsonObject& json = stream->getRoot();
+	if (request.getRequestMethod() == RequestMethod::POST)
+	{
+		if (request.getBody() == NULL)
+		{
+			debugf("NULL bodyBuf");
+			return;
+		}
+		else
+		{
+			StaticJsonBuffer<stateJsonBufSize> jsonBuffer;
+			JsonObject& root = jsonBuffer.parseObject(request.getBody());
+			root.prettyPrintTo(Serial); //Uncomment it for debuging
 
-	json["name"] = _name;
-	json["active"] = _active;
-	json["state"] = _state;
-	json["temperature"] = _tempSensor->getTemp();
-	json["manual"] = _manual;
-	json["manualTargetTemp"] = _manualTargetTemp;
-	json["targetTempDelta"] = _targetTempDelta;
+			if (root["active"].success()) // Settings
+			{
+				_active = root["active"];
+				saveStateCfg();
+				return;
+			}
+			if (root["manual"].success()) // Settings
+			{
+				_manual = root["manual"];
+				saveStateCfg();
+				return;
+			}
+			if (root["manualTargetTemp"].success()) // Settings
+			{
+				_manualTargetTemp = ((float)(root["manualTargetTemp"]) * 100);
+				saveStateCfg();
+				return;
+			}
+			if (root["targetTempDelta"].success()) // Settings
+			{
+				_targetTempDelta = ((float)(root["targetTempDelta"]) * 100);
+				saveStateCfg();
+				return;
+			}
+		}
+	}
+	else
+	{
+		JsonObjectStream* stream = new JsonObjectStream();
+		JsonObject& json = stream->getRoot();
 
-	response.setHeader("Access-Control-Allow-Origin", "*");
-	response.sendJsonObject(stream);
+		json["name"] = _name;
+		json["active"] = _active;
+		json["state"] = _state;
+		json["temperature"] = _tempSensor->getTemp();
+		json["manual"] = _manual;
+		json["manualTargetTemp"] = _manualTargetTemp;
+		json["targetTempDelta"] = _targetTempDelta;
+
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.sendJsonObject(stream);
+	}
 }
 
 uint8_t Thermostat::saveStateCfg()
