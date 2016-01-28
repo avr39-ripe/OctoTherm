@@ -85,10 +85,8 @@ uint8_t Thermostat::loadStateCfg()
 		fileGetContent(".state" + _name, jsonString, size + 1);
 		JsonObject& root = jsonBuffer.parseObject(jsonString);
 
-//		JsonObject& jsonThermostat = root["thermostat"];
 		_name = String((const char*)root["name"]);
 		_active = root["active"];
-//		_state = root["state"];
 		_manual = root["manual"];
 		_manualTargetTemp = root["manualTargetTemp"];
 		_targetTempDelta = root["targetTempDelta"];
@@ -106,10 +104,13 @@ void Thermostat::sendStateCfg(HttpRequest &request, HttpResponse &response)
 
 	json["name"] = _name;
 	json["active"] = _active;
+	json["state"] = _state;
+	json["temperature"] = _tempSensor->getTemp();
 	json["manual"] = _manual;
 	json["manualTargetTemp"] = _manualTargetTemp;
 	json["targetTempDelta"] = _targetTempDelta;
 
+	response.setHeader("Access-Control-Allow-Origin", "*");
 	response.sendJsonObject(stream);
 }
 
@@ -124,7 +125,7 @@ uint8_t Thermostat::saveStateCfg()
 	root["manualTargetTemp"] = _manualTargetTemp;
 	root["targetTempDelta"] = _targetTempDelta;
 
-	root.prettyPrintTo(Serial);
+//	root.prettyPrintTo(Serial);
 
 	char buf[stateFileBufSize];
 	root.printTo(buf, sizeof(buf));
