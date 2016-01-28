@@ -32,13 +32,13 @@ var connected = false;
 var doingsave = false;
 
 var thermostat = {
-	temperature: "21",
-	state: 1,
 	name: "Zone Name",
-	opmode: 0,
-    active: 0,
+	active: 0,
+	state: 1,
+	temperature: "22.00",
+	manual: 0,
     manualTargetTemp: 2100,
-    manual: 0
+    targetTempDelta: 500
 };
 
 var schedule = {};
@@ -145,13 +145,13 @@ function update() {
 	$(".zone-title").html(thermostat.name);
 	$(".zone-temperature").html((Number(thermostat.temperature)).toFixed(1) + "&deg;C");
 	
-	if(thermostat.state === 0) {
-		$("#zone-setpoint").css("color", "#000000");
-	} else {
+	if(thermostat.state) {
 		$("#zone-setpoint").css("color", "#f00000");
+	} else {
+		$("#zone-setpoint").css("color", "#000000");
 	}
 	
-	if (thermostat.active === 1) {
+	if (thermostat.active) {
 		$("#thermostatState").html("ON");
 		$("#thermostatState").css("background-color", "#ff9600");
 	} else {
@@ -159,7 +159,7 @@ function update() {
 		$("#thermostatState").css("background-color", "#555");
 	}
 	
-	if (thermostat.manual === 1) {
+	if (thermostat.manual) {
 		$(".thermostatmode").css("background-color", "#555");
 		$("#manual_thermostat").css("background-color", "#ff9600");
 		$("#scheduled_thermostat").css("background-color", "#555");
@@ -168,17 +168,6 @@ function update() {
 		$("#manual_thermostat").css("background-color", "#555");
 		$("#scheduled_thermostat").css("background-color", "#ff9600");
 	}
-	
-	if (thermostat.opmode == 0) {
-		$(".thermostatopmode").css("background-color", "#555");
-		$("#heating_thermostat").css("background-color", "#c00000");
-		$("#cooling_thermostat").css("background-color", "#555");
-	} else {
-		$(".thermostatopmode").css("background-color", "#555");    
-		$("#heating_thermostat").css("background-color", "#555");
-		$("#cooling_thermostat").css("background-color", "#0000c0");
-	}
-	
 }
 
 // ============================================
@@ -674,12 +663,69 @@ function ajaxGetSchedule() {
 		
 		if (this.readyState != 4) return;
 		if (this.status == 200) {
-			schedule = JSON.parse(this.responseText);
-			for (var d in schedule) {
-			    for (var z in schedule[d]) {
-			        schedule[d][z].s = toHours(schedule[d][z].s);
-			        schedule[d][z].tt /= 100;
-			    }
+			if (this.responseText.length > 0) {
+				schedule = JSON.parse(this.responseText);
+				for (var d in schedule) {
+				    for (var z in schedule[d]) {
+				        schedule[d][z].s = toHours(schedule[d][z].s);
+				        schedule[d][z].tt /= 100;
+				    }
+				}
+				for (day in schedule) draw_day_slider(day);
+			}
+		}
+	  	else {
+		    // обработать ошибку
+		    alert( 'ошибка: ' + this.statusText );
+		    return;
+	    }
+	}
+}
+
+function ajaxGetState() {
+	
+	var xhr = new XMLHttpRequest();
+
+	xhr.open('GET', '/state.json', true);
+
+	xhr.send();
+
+	xhr.onreadystatechange = function() {
+		
+		if (this.readyState != 4) return;
+		if (this.status == 200) {
+			if (this.responseText.length > 0) {
+				var tstate = JSON.parse(this.responseText);
+				thermostat.temperature = tstate.temperature;
+				thermostat.state = tstate.state;
+				update();
+			}
+		}
+	  	else {
+		    // обработать ошибку
+		    alert( 'ошибка: ' + this.statusText );
+		    return;
+	    }
+	}
+}
+
+function ajaxGetAllState() {
+	
+	var xhr = new XMLHttpRequest();
+
+	xhr.open('GET', '/state.json', true);
+
+	xhr.send();
+
+	xhr.onreadystatechange = function() {
+		
+		if (this.readyState != 4) return;
+		if (this.status == 200) {
+			if (this.responseText.length > 0) {
+				thermostat = JSON.parse(this.responseText);
+				thermostat.manualTargetTemp /= 100;
+				thermostat.targetTempDelta /= 100;
+				update();
 			}
 		}
 	  	else {
@@ -704,13 +750,12 @@ function onDocumentRedy() {
 
 	scheduleToFloat();
 	
-	//thermostat = server_get2("state");
-	thermostat.manualTargetTemp /= 100;
+	ajaxGetAllState()
 	
 	update();
 	updateclock();
 	
-	setInterval(server_get, 5000);
+	setInterval(ajaxGetState, 5000);
 	setInterval(updateclock, 1000);
 	
 	for (day in schedule) draw_day_slider(day);
