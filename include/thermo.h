@@ -38,7 +38,7 @@ public:
 	void onStateCfg(HttpRequest &request, HttpResponse &response);
 	uint8_t saveStateCfg();
 	uint8_t loadStateCfg();
-	void sendScheduleCfg(HttpRequest &request, HttpResponse &response);
+	void onScheduleCfg(HttpRequest &request, HttpResponse &response);
 	uint8_t saveScheduleCfg();
 	uint8_t loadScheduleCfg();
 

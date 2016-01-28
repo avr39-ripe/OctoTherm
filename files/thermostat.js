@@ -199,7 +199,8 @@ $("body").on("mousedown", ".slider-button", function (e) {
 $("body").mouseup(function (e) {
     mousedown = 0;
     if (changed) {
-        save("thermostat_schedule", "{\"" + day + "\":" + JSON.stringify(calc_schedule_esp(schedule[day])) + "}");
+//        save("thermostat_schedule", "{\"" + day + "\":" + JSON.stringify(calc_schedule_esp(schedule[day])) + "}");
+    	ajaxSaveDaySchedule(day);
         changed = 0;
     }
 });
@@ -219,7 +220,8 @@ $("body").on("touchstart", ".slider-button", function (e) {
 $("body").on("touchend", ".slider-button", function (e) {
     mousedown = 0;
     if (changed) {
-        save("thermostat_schedule", "{\"" + day + "\":" + JSON.stringify(calc_schedule_esp(schedule[day])) + "}");
+//        save("thermostat_schedule", "{\"" + day + "\":" + JSON.stringify(calc_schedule_esp(schedule[day])) + "}");
+    	ajaxSaveDaySchedule(day);
         changed = 0;
     }
 });
@@ -299,7 +301,8 @@ $("body").on("click", "#slider-segment-ok", function () {
     $("#slider-segment-end").val(format_time(endTime(key)));
     update_slider_ui(day, key + 1);
     
-    save("thermostat_schedule", "{\"" + day + "\":" + JSON.stringify(calc_schedule_esp(schedule[day])) + "}");
+//    save("thermostat_schedule", "{\"" + day + "\":" + JSON.stringify(calc_schedule_esp(schedule[day])) + "}");
+    ajaxSaveDaySchedule(day);
     updateclock();
 
 });
@@ -314,7 +317,8 @@ $("#slider-segment-movepos-ok").click(function () {
       }
     $("#slider-segment-time").val(format_time(schedule[day][key].s));
     update_slider_ui(day, key);
-    save("thermostat_schedule", "{\"" + day + "\":" + JSON.stringify(calc_schedule_esp(schedule[day])) + "}");
+//    save("thermostat_schedule", "{\"" + day + "\":" + JSON.stringify(calc_schedule_esp(schedule[day])) + "}");
+    ajaxSaveDaySchedule(day);
 });
 
 function color_map(temperature) {
@@ -459,19 +463,22 @@ function loadDaySchedule(dayScheduleJson) {
 	}
 }
 
-function saveDaySchedule(day) {
+function ajaxSaveDaySchedule(day) {
 	if (schedule[day] !== undefined) {
+		var xhr = new XMLHttpRequest();
+
+		xhr.open('POST', '/schedule.json', true);
+		xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8')
+		
 		var scheduleMinutes = JSON.parse(JSON.stringify(schedule[day]));
 		for (var z in scheduleMinutes) {
 			scheduleMinutes[z].s = toMinutes(scheduleMinutes[z].s);
+			scheduleMinutes[z].tt *= 100;
 		};
 		var json = {}
 		json[day] = scheduleMinutes;
 		
-		var jsonStr = JSON.stringify(scheduleMinutes);
-		console.log(JSON.stringify(json));
-//		console.log(jsonStr);
-		return JSON.stringify(json);
+		xhr.send(JSON.stringify(json));
 		}
 }
 

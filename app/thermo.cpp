@@ -217,24 +217,42 @@ uint8_t Thermostat::loadScheduleCfg()
 	return 0;
 }
 
-void Thermostat::sendScheduleCfg(HttpRequest &request, HttpResponse &response)
+void Thermostat::onScheduleCfg(HttpRequest &request, HttpResponse &response)
 {
-//	StaticJsonBuffer<scheduleJsonBufSize> jsonBuffer;
-//	JsonObjectStream* stream = new JsonObjectStream();
-//	JsonObject& json = stream->getRoot();
-//
-//	for (uint8_t day = 0; day < 7; day++)
-//	{
-//		JsonArray& jsonDay = json.createNestedArray((String)day);
-//		for (uint8_t prog = 0; prog < maxProg; prog++)
-//		{
-//			JsonObject& jsonProg = jsonBuffer.createObject();
-//			jsonProg["s"] = _schedule[day][prog].start;
-//			jsonProg["tt"] = _schedule[day][prog].targetTemp;
-//			jsonDay.add(jsonProg);
-//		}
-//	}
 	StaticJsonBuffer<scheduleJsonBufSize> jsonBuffer;
+	if (request.getRequestMethod() == RequestMethod::POST)
+	{
+		if (request.getBody() == NULL)
+		{
+			Serial.println("NULL bodyBuf");
+			return;
+		}
+		else
+		{
+
+			Serial.println(request.getBody());
+			JsonObject& root = jsonBuffer.parseObject(request.getBody());
+			root.prettyPrintTo(Serial); //Uncomment it for debuging
+
+			for (uint8_t day = 0; day < 7; day++)
+			{
+				if (root[(String)day].success())
+				{
+				  for (uint8_t prog = 0; prog < maxProg; prog++)
+				  {
+					  _schedule[day][prog].start = root[(String)day][prog]["s"];
+					  _schedule[day][prog].targetTemp = root[(String)day][prog]["tt"];
+					  Serial.printf("{s: %d,tt: %d}", _schedule[day][prog].start, _schedule[day][prog].targetTemp);
+				  }
+				  //saveScheduleCfg();
+				  return;
+				}
+			}
+		}
+	}
+	else
+	{
+//		StaticJsonBuffer<scheduleJsonBufSize> jsonBuffer;
 		JsonObject& root = jsonBuffer.createObject();
 		for (uint8_t day = 0; day < 7; day++)
 		{
@@ -247,12 +265,13 @@ void Thermostat::sendScheduleCfg(HttpRequest &request, HttpResponse &response)
 				jsonDay.add(jsonProg);
 			}
 		}
-	char buf[scheduleFileBufSize];
-	root.printTo(buf, sizeof(buf));
+		char buf[scheduleFileBufSize];
+		root.printTo(buf, sizeof(buf));
 
-	response.setHeader("Access-Control-Allow-Origin", "*");
-	response.setContentType(ContentType::JSON);
-	response.sendString(buf);
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setContentType(ContentType::JSON);
+		response.sendString(buf);
+	}
 }
 uint8_t Thermostat::saveScheduleCfg()
 {

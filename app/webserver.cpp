@@ -118,7 +118,7 @@ void onStateJson(HttpRequest &request, HttpResponse &response)
 
 void onScheduleJson(HttpRequest &request, HttpResponse &response)
 {
-	thermostat->sendScheduleCfg(request,response);
+	thermostat->onScheduleCfg(request,response);
 }
 
 void startWebServer()
