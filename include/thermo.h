@@ -35,10 +35,6 @@ public:
 	void start();
 	void stop();
 	void check();
-	void jsonToStateCfg(String json); //convert json-string to state-part config
-	String stateCfgToJson(); //convert state-part cfg to json-String
-	void jsonToScheduleCfg(String json); //convert json-string to schedule-part config
-	String scheduleCfgToJson(); //convert schedule-part cfg to json-String
 	void sendStateCfg(HttpRequest &request, HttpResponse &response);
 	uint8_t saveStateCfg();
 	uint8_t loadStateCfg();
