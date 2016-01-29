@@ -41,7 +41,8 @@ public:
 	void onScheduleCfg(HttpRequest &request, HttpResponse &response);
 	uint8_t saveScheduleCfg();
 	uint8_t loadScheduleCfg();
-
+	void saveScheduleBinCfg();
+	void loadScheduleBinCfg();
 //	void setSched(uint8_t wDay, uint8_t progNum, uint16_t minutes, float tergetTemp);
 //	SchedUnit getSched(uint8_t wDay, uint8_t progNum);
 	SchedUnit _schedule[7][maxProg]; // 7 day X maxProg programs in schedule

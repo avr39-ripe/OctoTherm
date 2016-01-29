@@ -43,11 +43,20 @@ void init()
 		thermostat->_schedule[i][5].targetTemp = 800;
 	}
 
+//	file_t file = fileOpen("schedule.conf", eFO_CreateIfNotExist | eFO_WriteOnly);
+//	fileWrite(file, thermostat->_schedule, sizeof(SchedUnit)*6*7);
+//	fileClose(file);
+//
+//	file = fileOpen("schedule.conf", eFO_ReadOnly);
+//	fileSeek(file, 0, eSO_FileStart);
+//	fileRead(file, thermostat->_schedule, sizeof(SchedUnit)*6*7);
+//	fileClose(file);
+
 //	thermostat->saveStateCfg();
 //	thermostat->saveScheduleCfg();
 
 	thermostat->loadStateCfg();
-	thermostat->loadScheduleCfg();
+	thermostat->loadScheduleBinCfg();
 
 	if (ActiveConfig.StaEnable)
 	{

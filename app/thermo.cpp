@@ -244,7 +244,7 @@ void Thermostat::onScheduleCfg(HttpRequest &request, HttpResponse &response)
 					  _schedule[day][prog].targetTemp = root[(String)day][prog]["tt"];
 					  Serial.printf("{s: %d,tt: %d}", _schedule[day][prog].start, _schedule[day][prog].targetTemp);
 				  }
-				  //saveScheduleCfg();
+				  saveScheduleBinCfg();
 				  return;
 				}
 			}
@@ -293,4 +293,19 @@ uint8_t Thermostat::saveScheduleCfg()
 	char buf[scheduleFileBufSize];
 	root.printTo(buf, sizeof(buf));
 	fileSetContent(".sched" + _name, buf);
+}
+
+void Thermostat::saveScheduleBinCfg()
+{
+	file_t file = fileOpen(".schedule" + _name, eFO_CreateIfNotExist | eFO_WriteOnly);
+	fileWrite(file, _schedule, sizeof(SchedUnit)*6*7);
+	fileClose(file);
+}
+
+void Thermostat::loadScheduleBinCfg()
+{
+	file_t file = fileOpen(".schedule" + _name, eFO_ReadOnly);
+	fileSeek(file, 0, eSO_FileStart);
+	fileRead(file, _schedule, sizeof(SchedUnit)*6*7);
+	fileClose(file);
 }
