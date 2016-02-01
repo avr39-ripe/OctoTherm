@@ -13,7 +13,9 @@
 const uint8_t maxProg = 6 ;
 
 const uint16_t scheduleJsonBufSize = JSON_OBJECT_SIZE(120) + JSON_ARRAY_SIZE(42);
+const uint16_t scheduleJsonBufSmallSize = JSON_OBJECT_SIZE(40) + JSON_ARRAY_SIZE(15);
 const uint16_t scheduleFileBufSize = 1152;
+const uint16_t scheduleFileBufSmallSize = 256;
 const uint16_t stateJsonBufSize = JSON_OBJECT_SIZE(10);
 const uint16_t stateFileBufSize = 256;
 
