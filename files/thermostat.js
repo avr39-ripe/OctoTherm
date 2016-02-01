@@ -5,6 +5,8 @@ const setPointInc = 0.5;
 const maxc = 26;
 const minc = 5;
 
+var ajaxGet = 0;
+
 var now = new Date();
 var timenow = now.getHours() + (now.getMinutes() / 60);
 var days = {
@@ -467,7 +469,7 @@ function ajaxSaveDaySchedule(day) {
 	if (schedule[day] !== undefined) {
 		var xhr = new XMLHttpRequest();
 
-		xhr.open('POST', '/schedule.json', true);
+		xhr.open('POST', '/schedule.json?day=' + day, true);
 		xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8')
 		
 		var scheduleMinutes = JSON.parse(JSON.stringify(schedule[day]));
@@ -665,27 +667,34 @@ function onScheduledThermostat() {
     updateclock();
 }
 
-function ajaxGetSchedule() {
+function ajaxGetSchedule(day) {
 	
 	var xhr = new XMLHttpRequest();
 
-	xhr.open('GET', '/schedule.json', true);
-
+	xhr.open('GET', '/schedule.json?day=' + day, true);
+	
+	while (ajaxGet) {
+		;
+	}
 	xhr.send();
 
 	xhr.onreadystatechange = function() {
 		
-		if (this.readyState != 4) return;
+		if (this.readyState == 0) {
+			ajaxGet = 1;
+		} else if (this.readyState != 4) return;
 		if (this.status == 200) {
 			if (this.responseText.length > 0) {
-				schedule = JSON.parse(this.responseText);
-				for (var d in schedule) {
-				    for (var z in schedule[d]) {
-				        schedule[d][z].s = toHours(schedule[d][z].s);
-				        schedule[d][z].tt /= 100;
+				schedule[day] = JSON.parse(this.responseText)[day];
+//				for (var d in schedule) {
+				    for (var z in schedule[day]) {
+				        schedule[day][z].s = toHours(schedule[day][z].s);
+				        schedule[day][z].tt /= 100;
 				    }
-				}
-				for (day in schedule) draw_day_slider(day);
+//				}
+//				for (day in schedule) draw_day_slider(day);
+				draw_day_slider(day);
+				ajaxGet = 0;
 			}
 		}
 	  	else {
@@ -774,10 +783,11 @@ function onDocumentRedy() {
 	
 	//Init
 	//schedule = server_get2("thermostat_schedule"); //all data * 100 to avoid floating point on the ESP8266 side
-	ajaxGetSchedule();
-	scheduleToFloat();
-	
-	ajaxGetAllState()
+	for (var day1 = 0; day1<7; day1++) {
+		ajaxGetSchedule(day1);
+//		draw_day_slider(day1);
+	}
+
 	
 //	update();
 //	updateclock();

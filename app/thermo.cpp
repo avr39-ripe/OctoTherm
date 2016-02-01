@@ -220,6 +220,8 @@ uint8_t Thermostat::loadScheduleCfg()
 void Thermostat::onScheduleCfg(HttpRequest &request, HttpResponse &response)
 {
 	StaticJsonBuffer<scheduleJsonBufSize> jsonBuffer;
+	uint8_t day = request.getQueryParameter("day").toInt();
+
 	if (request.getRequestMethod() == RequestMethod::POST)
 	{
 		if (request.getBody() == NULL)
@@ -234,8 +236,8 @@ void Thermostat::onScheduleCfg(HttpRequest &request, HttpResponse &response)
 			JsonObject& root = jsonBuffer.parseObject(request.getBody());
 			root.prettyPrintTo(Serial); //Uncomment it for debuging
 
-			for (uint8_t day = 0; day < 7; day++)
-			{
+//			for (uint8_t day = 0; day < 7; day++)
+//			{
 				if (root[(String)day].success())
 				{
 				  for (uint8_t prog = 0; prog < maxProg; prog++)
@@ -247,24 +249,42 @@ void Thermostat::onScheduleCfg(HttpRequest &request, HttpResponse &response)
 				  saveScheduleBinCfg();
 				  return;
 				}
-			}
+//			}
 		}
 	}
 	else
 	{
 //		StaticJsonBuffer<scheduleJsonBufSize> jsonBuffer;
+//		JsonObject& root = jsonBuffer.createObject();
+//		for (uint8_t day = 0; day < 7; day++)
+//		{
+//			JsonArray& jsonDay = root.createNestedArray((String)day);
+//			for (uint8_t prog = 0; prog < maxProg; prog++)
+//			{
+//				JsonObject& jsonProg = jsonBuffer.createObject();
+//				jsonProg["s"] = _schedule[day][prog].start;
+//				jsonProg["tt"] = _schedule[day][prog].targetTemp;
+//				jsonDay.add(jsonProg);
+//			}
+//		}
+//		char buf[scheduleFileBufSize];
+//		root.printTo(buf, sizeof(buf));
+
+//		for (uint8_t day = 0; day < 7; day++)
+//		{
 		JsonObject& root = jsonBuffer.createObject();
-		for (uint8_t day = 0; day < 7; day++)
+		JsonArray& jsonDay = root.createNestedArray((String)day);
+		for (uint8_t prog = 0; prog < maxProg; prog++)
 		{
-			JsonArray& jsonDay = root.createNestedArray((String)day);
-			for (uint8_t prog = 0; prog < maxProg; prog++)
-			{
-				JsonObject& jsonProg = jsonBuffer.createObject();
-				jsonProg["s"] = _schedule[day][prog].start;
-				jsonProg["tt"] = _schedule[day][prog].targetTemp;
-				jsonDay.add(jsonProg);
-			}
+			JsonObject& jsonProg = jsonBuffer.createObject();
+			jsonProg["s"] = _schedule[day][prog].start;
+			jsonProg["tt"] = _schedule[day][prog].targetTemp;
+			jsonDay.add(jsonProg);
+
 		}
+
+//		}
+
 		char buf[scheduleFileBufSize];
 		root.printTo(buf, sizeof(buf));
 
