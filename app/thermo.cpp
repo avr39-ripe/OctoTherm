@@ -21,60 +21,76 @@ void Thermostat::check()
 {
 	float currTemp = _tempSensor->getTemp();
 	float targetTemp = 0;
+	uint8_t currentProg = 0;
 
 	if (!_active)
 	{
 		Serial.println("active = false");
-		_state = false;
-		return;
-	}
-	if (_manual)
-	{
-		targetTemp = float(_manualTargetTemp / 100.0);
+		targetTemp = antiFrozen;
 	}
 	else
 	{
 		DateTime now = SystemClock.now(eTZ_Local);
-		Serial.print("DateTime: "); Serial.println(now.toFullDateTimeString());
 		SchedUnit daySchedule[maxProg] = _schedule[now.DayofWeek];
-		Serial.print("dayOfWeek: "); Serial.println(now.DayofWeek);
 		uint16_t nowMinutes = now.Hour * 60 + now.Minute;
+		Serial.printf("DateTime: %s, dayOfWeek: %d ", now.toFullDateTimeString().c_str(), now.DayofWeek);
 
 		for (uint8_t i = 0; i < maxProg; i++)
 		{
-			Serial.print("I: "); Serial.println(i);
 			uint8_t nextIdx = i < (maxProg - 1) ? i + 1 : 0;
-			Serial.print("nextIdx: "); Serial.println(nextIdx);
-			Serial.print("nowMinutes: "); Serial.println(nowMinutes);
-			Serial.print("daySchedule[i].minutes: "); Serial.println(daySchedule[i].start);
-			Serial.print("daySchedule[nextIdx].minutes: "); Serial.println(daySchedule[nextIdx].start);
+//			Serial.printf("I: %d, nextIdx: %d, nowMinutes: %d, daySchedule[i].minutes: %d, daySchedule[nextIdx].minutes: %d ",i, nextIdx, nowMinutes, daySchedule[i].start, daySchedule[nextIdx].start);
 
 			bool dayTransit = daySchedule[i].start > daySchedule[nextIdx].start;
-			Serial.print("dayTransit: "); Serial.println(dayTransit);
+//			Serial.printf("dayTransit: %d\n", dayTransit);
 
-			if ( ((!dayTransit) && ((nowMinutes >= daySchedule[i].start) && (nowMinutes <= daySchedule[nextIdx].start))) )
+			if ( ((!dayTransit) && ((nowMinutes >= daySchedule[i].start) && (nowMinutes < daySchedule[nextIdx].start))) )
 			{
-				Serial.print("AND Idx: "); Serial.println(i);
-				targetTemp = (float)daySchedule[i].targetTemp / 100.0; //in-place convert to float
-				Serial.print("AND selected targetTemp: "); Serial.println(targetTemp);
+				Serial.printf("AND selected Prog: %d ", i);
+				currentProg = i;
 				break;
 			}
-			if ( ((dayTransit) && ((nowMinutes >= daySchedule[i].start) || (nowMinutes <= daySchedule[nextIdx].start))) )
+			if ( ((dayTransit) && ((nowMinutes >= daySchedule[i].start) || (nowMinutes < daySchedule[nextIdx].start))) )
 			{
-				Serial.print("OR Idx: "); Serial.println(i);
-				targetTemp = (float)daySchedule[i].targetTemp / 100.0; //in-place convert to float
-				Serial.print("OR selected targetTemp: "); Serial.println(targetTemp);
+				Serial.printf("OR selected Prog: %d ", i);
+				currentProg = i;
 				break;
 			}
 		}
+
+		if (_manual && !_prevManual)
+		{
+			Serial.println("turn Manual on by user");
+			_prevManual = true;
+			_manualProg = currentProg;
+//			targetTemp = float(_manualTargetTemp / 100.0);
+		}
+		else if (_prevManual && !_manual)
+		{
+			Serial.println("turn Manual off by user");
+			_prevManual = false;
+		}
+
+		if (_manual)
+			targetTemp = float(_manualTargetTemp / 100.0);
+		else
+			targetTemp = (float)daySchedule[currentProg].targetTemp / 100.0; //in-place convert to float
+
+		if (_manual && (_manualProg != currentProg))
+		{
+			Serial.println("turn Manual off with program change");
+			_manual = false;
+			_prevManual = false;
+			targetTemp = (float)daySchedule[currentProg].targetTemp / 100.0; //in-place convert to float
+		}
 	}
-	Serial.print("targetTemp: "); Serial.println(targetTemp);
-	Serial.print("targetTempDelta: "); Serial.println((float)(_targetTempDelta / 100.0));
+
+	Serial.print("targetTemp: "); Serial.println(targetTemp); //FLOAT!!!
+
 	if (currTemp >= targetTemp + (float)(_targetTempDelta / 100.0))
 		_state = false;
 	if (currTemp <= targetTemp - (float)(_targetTempDelta / 100.0))
 		_state = true;
-	Serial.printf("State: %s\n", _state ? "true" : "false");
+	Serial.printf(" State: %s\n", _state ? "true" : "false");
 }
 
 void Thermostat::start()
@@ -102,7 +118,7 @@ uint8_t Thermostat::loadStateCfg()
 
 		_name = String((const char*)root["name"]);
 		_active = root["active"];
-		_manual = root["manual"];
+//		_manual = root["manual"];
 		_manualTargetTemp = root["manualTargetTemp"];
 		_targetTempDelta = root["targetTempDelta"];
 
@@ -136,7 +152,7 @@ void Thermostat::onStateCfg(HttpRequest &request, HttpResponse &response)
 			if (root["manual"].success()) // Settings
 			{
 				_manual = root["manual"];
-				saveStateCfg();
+//				saveStateCfg();
 				return;
 			}
 			if (root["manualTargetTemp"].success()) // Settings
@@ -178,7 +194,7 @@ uint8_t Thermostat::saveStateCfg()
 
 	root["name"] = _name.c_str();
 	root["active"] = _active;
-	root["manual"] = _manual;
+//	root["manual"] = _manual;
 	root["manualTargetTemp"] = _manualTargetTemp;
 	root["targetTempDelta"] = _targetTempDelta;
 

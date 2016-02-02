@@ -10,7 +10,8 @@
 #include <SmingCore/SmingCore.h>
 #include <tempsensor.h>
 
-const uint8_t maxProg = 6 ;
+const uint8_t maxProg = 6;
+const uint8_t antiFrozen = 5; // temperature to maintain when thermostat is not _active to prevent system freeze
 
 const uint16_t scheduleJsonBufSize = JSON_OBJECT_SIZE(120) + JSON_ARRAY_SIZE(42);
 const uint16_t scheduleFileBufSize = 1152;
@@ -43,6 +44,7 @@ public:
 	uint8_t loadScheduleCfg();
 	void saveScheduleBinCfg();
 	void loadScheduleBinCfg();
+//	void setManual(bool); // setter for _manual
 //	void setSched(uint8_t wDay, uint8_t progNum, uint16_t minutes, float tergetTemp);
 //	SchedUnit getSched(uint8_t wDay, uint8_t progNum);
 	SchedUnit _schedule[7][maxProg]; // 7 day X maxProg programs in schedule
@@ -58,6 +60,8 @@ private:
 	uint16_t _refresh; // thermostat update interval
 	Timer _refreshTimer; // timer for thermostat update
 	TempSensor *_tempSensor;
+	bool _prevManual = false; // previous state of _manual
+	uint8_t _manualProg = 0; // program that was when manual mode turned on, when program change, manual mode will turn off
 };
 
 
