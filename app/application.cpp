@@ -5,7 +5,7 @@ Timer counterTimer;
 void counter_loop();
 unsigned long counter = 0;
 TempSensorHttp *tempSensor;
-Thermostat *thermostat;
+Thermostat *thermostat[2];
 
 NtpClient ntpClient("pool.ntp.org", 30);
 
@@ -25,22 +25,26 @@ void init()
 	ActiveConfig = loadConfig();
 
 	tempSensor = new TempSensorHttp(ActiveConfig.sensorUrl);
-	thermostat = new Thermostat(*tempSensor,"Office", 4000);
+	thermostat[0] = new Thermostat(*tempSensor,"Office", 4000);
+	thermostat[1] = new Thermostat(*tempSensor,"Kitchen", 4000);
 
 	for(uint8_t i = 0; i< 7; i++)
 	{
-		thermostat->_schedule[i][0].start = 0;
-		thermostat->_schedule[i][0].targetTemp = 800;
-		thermostat->_schedule[i][1].start = 360;
-		thermostat->_schedule[i][1].targetTemp = 1800;
-		thermostat->_schedule[i][2].start = 540;
-		thermostat->_schedule[i][2].targetTemp = 1200;
-		thermostat->_schedule[i][3].start = 720;
-		thermostat->_schedule[i][3].targetTemp = 1500;
-		thermostat->_schedule[i][4].start = 1020;
-		thermostat->_schedule[i][4].targetTemp = 1800;
-		thermostat->_schedule[i][5].start = 1320;
-		thermostat->_schedule[i][5].targetTemp = 800;
+		for (uint t=0; t < maxThermostats; t++)
+		{
+			thermostat[t]->_schedule[i][0].start = 0;
+			thermostat[t]->_schedule[i][0].targetTemp = 800;
+			thermostat[t]->_schedule[i][1].start = 360;
+			thermostat[t]->_schedule[i][1].targetTemp = 1800;
+			thermostat[t]->_schedule[i][2].start = 540;
+			thermostat[t]->_schedule[i][2].targetTemp = 1200;
+			thermostat[t]->_schedule[i][3].start = 720;
+			thermostat[t]->_schedule[i][3].targetTemp = 1500;
+			thermostat[t]->_schedule[i][4].start = 1020;
+			thermostat[t]->_schedule[i][4].targetTemp = 1800;
+			thermostat[t]->_schedule[i][5].start = 1320;
+			thermostat[t]->_schedule[i][5].targetTemp = 800;
+		}
 	}
 
 //	file_t file = fileOpen("schedule.conf", eFO_CreateIfNotExist | eFO_WriteOnly);
@@ -55,8 +59,11 @@ void init()
 //	thermostat->saveStateCfg();
 //	thermostat->saveScheduleCfg();
 
-	thermostat->loadStateCfg();
-	thermostat->loadScheduleBinCfg();
+	for (uint t=0; t < maxThermostats; t++)
+	{
+		thermostat[t]->loadStateCfg();
+		thermostat[t]->loadScheduleBinCfg();
+	}
 
 	if (ActiveConfig.StaEnable)
 	{
@@ -89,7 +96,8 @@ void StaConnectOk()
 	Serial.println("connected to AP");
 	ntpClient.requestTime();
 	tempSensor->start();
-	thermostat->start();
+	for (uint t=0; t < maxThermostats; t++)
+		thermostat[t]->start();
 	WifiAccessPoint.enable(false);
 
 }

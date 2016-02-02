@@ -113,12 +113,12 @@ void onAJAXGetState(HttpRequest &request, HttpResponse &response)
 
 void onStateJson(HttpRequest &request, HttpResponse &response)
 {
-	thermostat->onStateCfg(request,response);
+	thermostat[0]->onStateCfg(request,response);
 }
 
 void onScheduleJson(HttpRequest &request, HttpResponse &response)
 {
-	thermostat->onScheduleCfg(request,response);
+	thermostat[0]->onScheduleCfg(request,response);
 }
 
 void startWebServer()

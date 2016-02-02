@@ -10,7 +10,7 @@
 const uint8_t onewire_pin = 2;
 extern OneWire ds;
 extern TempSensorHttp *tempSensor;
-extern Thermostat *thermostat;
+extern Thermostat *thermostat[maxThermostats];
 
 extern unsigned long counter; // Kind of heartbeat counter
 extern float temperature; // TyTherm accuired temperature

@@ -10,6 +10,7 @@
 #include <SmingCore/SmingCore.h>
 #include <tempsensor.h>
 
+const uint8_t maxThermostats = 2;
 const uint8_t maxProg = 6;
 const uint8_t antiFrozen = 5; // temperature to maintain when thermostat is not _active to prevent system freeze
 
