@@ -33,7 +33,7 @@ void Thermostat::check()
 		DateTime now = SystemClock.now(eTZ_Local);
 		SchedUnit daySchedule[maxProg] = _schedule[now.DayofWeek];
 		uint16_t nowMinutes = now.Hour * 60 + now.Minute;
-		Serial.printf("DateTime: %s, dayOfWeek: %d ", now.toFullDateTimeString().c_str(), now.DayofWeek);
+		Serial.printf("Name: %s, DateTime: %s,", _name.c_str(), now.toFullDateTimeString().c_str());
 
 		for (uint8_t i = 0; i < maxProg; i++)
 		{
@@ -84,7 +84,7 @@ void Thermostat::check()
 		}
 	}
 
-	Serial.print("targetTemp: "); Serial.println(targetTemp); //FLOAT!!!
+	Serial.print("targetTemp: "); Serial.print(targetTemp); //FLOAT!!!
 
 	if (currTemp >= targetTemp + (float)(_targetTempDelta / 100.0))
 		_state = false;
