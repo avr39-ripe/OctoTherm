@@ -33,6 +33,7 @@ var statusMsg = false;
 var connected = false;
 var doingsave = false;
 
+var currThermostat = 0;
 var thermostat = {
 	name: "Zone Name",
 	active: 0,
@@ -145,7 +146,7 @@ function setStatus(msg,dur,pri){	 // show msg on status bar
 
 function update() {
 
-	$(".zone-title").html(thermostat.name);
+//	$(".zone-title").html(thermostat.name);
 	$(".zone-temperature").html((Number(thermostat.temperature)).toFixed(1) + "&deg;C");
 	
 	if(thermostat.state) {
@@ -468,25 +469,6 @@ function loadDaySchedule(dayScheduleJson) {
 	}
 }
 
-function ajaxSaveDaySchedule(day) {
-	if (schedule[day] !== undefined) {
-		var xhr = new XMLHttpRequest();
-
-		xhr.open('POST', '/schedule.json', true);
-		xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8')
-		
-		var scheduleMinutes = JSON.parse(JSON.stringify(schedule[day]));
-		for (var z in scheduleMinutes) {
-			scheduleMinutes[z].s = toMinutes(scheduleMinutes[z].s);
-			scheduleMinutes[z].tt *= 100;
-		};
-		var json = {}
-		json[day] = scheduleMinutes;
-		
-		xhr.send(JSON.stringify(json));
-		}
-}
-
 function save(param, payload) {
 	doingsave=true;
     $.ajax({
@@ -682,7 +664,7 @@ function ajaxGetSchedule() {
 	
 	var xhr = new XMLHttpRequest();
 
-	xhr.open('GET', '/schedule.json', true);
+	xhr.open('GET', '/schedule.json?thermostat=' + currThermostat, true);
 
 	xhr.send();
 
@@ -713,7 +695,7 @@ function ajaxGetState() {
 	
 	var xhr = new XMLHttpRequest();
 
-	xhr.open('GET', '/state.json', true);
+	xhr.open('GET', '/state.json?thermostat=' + currThermostat, true);
 
 	xhr.send();
 
@@ -741,7 +723,7 @@ function ajaxGetAllState() {
 	
 	var xhr = new XMLHttpRequest();
 
-	xhr.open('GET', '/state.json', true);
+	xhr.open('GET', '/state.json?thermostat=' + currThermostat, true);
 
 	xhr.send();
 
@@ -775,7 +757,11 @@ function ajaxGetThermostats() {
 			if (this.responseText.length > 0) {
 				thermostats = JSON.parse(this.responseText);
 				
-//				update();
+				var select = document.getElementById("thermostats");
+				Object.keys(thermostats).forEach(function(key) {
+				        var newOption = new Option(thermostats[key], key);
+				        select.appendChild(newOption);
+				    });
 			}
 		}
 	  	else {
@@ -786,11 +772,21 @@ function ajaxGetThermostats() {
 	}
 }
 
+function onThermostats() {
+	var select = document.getElementById("thermostats");
+	currThermostat = select.options[select.selectedIndex].value;
+	
+	ajaxGetSchedule();
+//	scheduleToFloat();
+	
+	ajaxGetAllState()
+}
+
 function ajaxSaveState(key) {
 	
 	var xhr = new XMLHttpRequest();
 
-	xhr.open('POST', '/state.json', true);
+	xhr.open('POST', '/state.json?thermostat=' + currThermostat, true);
 	xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8')
 	
 	var json = {};
@@ -799,9 +795,29 @@ function ajaxSaveState(key) {
 	xhr.send(JSON.stringify(json));
 }
 
+function ajaxSaveDaySchedule(day) {
+	if (schedule[day] !== undefined) {
+		var xhr = new XMLHttpRequest();
+
+		xhr.open('POST', '/schedule.json?thermostat=' + currThermostat, true);
+		xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8')
+		
+		var scheduleMinutes = JSON.parse(JSON.stringify(schedule[day]));
+		for (var z in scheduleMinutes) {
+			scheduleMinutes[z].s = toMinutes(scheduleMinutes[z].s);
+			scheduleMinutes[z].tt *= 100;
+		};
+		var json = {}
+		json[day] = scheduleMinutes;
+		
+		xhr.send(JSON.stringify(json));
+		}
+}
+
 //Here we put some initial code which starts after DOM loaded
 function onDocumentRedy() {
 	//Attach eventListeners
+	document.getElementById('thermostats').addEventListener('change', onThermostats);
 	document.getElementById('thermostatState').addEventListener('click', onThermostatStateButton);
 	document.getElementById('zone-setpoint-dec').addEventListener('click', onSetPointDec);
 	document.getElementById('zone-setpoint-inc').addEventListener('click', onSetPointInc);

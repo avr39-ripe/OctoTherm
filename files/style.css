@@ -198,3 +198,12 @@ input[type=text] {
 	flex:0 0 auto; /* Forces side columns to stay same width */
     width:40px; 
 }
+
+#thermostats {
+  font-size: 42px;
+  font-weight: bold;
+  height: 48px;
+  margin:40px;
+  background: transparent;
+  color: orange;
+}

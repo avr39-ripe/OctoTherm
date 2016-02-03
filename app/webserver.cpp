@@ -113,12 +113,14 @@ void onAJAXGetState(HttpRequest &request, HttpResponse &response)
 
 void onStateJson(HttpRequest &request, HttpResponse &response)
 {
-	thermostat[0]->onStateCfg(request,response);
+	uint8_t currThermostat = request.getQueryParameter("thermostat").toInt();
+	thermostat[currThermostat]->onStateCfg(request,response);
 }
 
 void onScheduleJson(HttpRequest &request, HttpResponse &response)
 {
-	thermostat[0]->onScheduleCfg(request,response);
+	uint8_t currThermostat = request.getQueryParameter("thermostat").toInt();
+	thermostat[currThermostat]->onScheduleCfg(request,response);
 }
 
 void onThermostatsJson(HttpRequest &request, HttpResponse &response)
@@ -136,6 +138,8 @@ void onThermostatsJson(HttpRequest &request, HttpResponse &response)
 	response.setHeader("Access-Control-Allow-Origin", "*");
 	response.setContentType(ContentType::JSON);
 	response.sendString(buf);
+
+
 }
 void startWebServer()
 {
