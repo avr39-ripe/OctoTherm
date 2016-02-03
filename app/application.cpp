@@ -5,7 +5,7 @@ Timer counterTimer;
 void counter_loop();
 unsigned long counter = 0;
 TempSensorHttp *tempSensor;
-Thermostat *thermostat[2];
+Thermostat *thermostat[maxThermostats];
 
 NtpClient ntpClient("pool.ntp.org", 30);
 
@@ -27,6 +27,8 @@ void init()
 	tempSensor = new TempSensorHttp(ActiveConfig.sensorUrl);
 	thermostat[0] = new Thermostat(*tempSensor,"Office", 4000);
 	thermostat[1] = new Thermostat(*tempSensor,"Kitchen", 4000);
+	thermostat[2] = new Thermostat(*tempSensor,"Hall", 4000);
+	thermostat[3] = new Thermostat(*tempSensor,"Bedroom", 4000);
 
 	for(uint8_t i = 0; i< 7; i++)
 	{

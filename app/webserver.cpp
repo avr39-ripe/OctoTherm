@@ -121,6 +121,22 @@ void onScheduleJson(HttpRequest &request, HttpResponse &response)
 	thermostat[0]->onScheduleCfg(request,response);
 }
 
+void onThermostatsJson(HttpRequest &request, HttpResponse &response)
+{
+	StaticJsonBuffer<thermostatsJsonBufSize> jsonBuffer;
+	JsonObject& root = jsonBuffer.createObject();
+	for (uint t=0; t < maxThermostats; t++)
+	{
+		root[(String)t] = thermostat[t]->getName();
+
+	}
+	char buf[scheduleFileBufSize];
+	root.printTo(buf, sizeof(buf));
+
+	response.setHeader("Access-Control-Allow-Origin", "*");
+	response.setContentType(ContentType::JSON);
+	response.sendString(buf);
+}
 void startWebServer()
 {
 	if (serverStarted) return;
@@ -132,6 +148,7 @@ void startWebServer()
 	server.addPath("/state", onAJAXGetState);
 	server.addPath("/state.json", onStateJson);
 	server.addPath("/schedule.json", onScheduleJson);
+	server.addPath("/thermostats.json", onThermostatsJson);
 	server.setDefaultHandler(onFile);
 	serverStarted = true;
 

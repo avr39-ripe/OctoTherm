@@ -10,7 +10,6 @@
 #include <SmingCore/SmingCore.h>
 #include <tempsensor.h>
 
-const uint8_t maxThermostats = 2;
 const uint8_t maxProg = 6;
 const uint8_t antiFrozen = 5; // temperature to maintain when thermostat is not _active to prevent system freeze
 
@@ -50,7 +49,7 @@ public:
 //	SchedUnit getSched(uint8_t wDay, uint8_t progNum);
 	SchedUnit _schedule[7][maxProg]; // 7 day X maxProg programs in schedule
 	uint8_t getState() { return _state; };
-	String getDescription() { return _name; };
+	String getName() { return _name; };
 private:
 	String _name; // some text description of thermostat
 	bool _active; //thermostat active (true), ON,  works, updates, changes its _state or turned OFF

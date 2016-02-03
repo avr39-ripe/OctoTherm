@@ -8,6 +8,7 @@ const minc = 5;
 
 var now = new Date();
 var timenow = now.getHours() + (now.getMinutes() / 60);
+var thermostats = {};
 var days = {
     0: 'sun',
     1: 'mon',
@@ -702,7 +703,7 @@ function ajaxGetSchedule() {
 		}
 	  	else {
 		    // обработать ошибку
-		    alert( 'ошибка: ' + this.statusText );
+	  		setStatus("No connection!",1,1);
 		    return;
 	    }
 	}
@@ -730,7 +731,7 @@ function ajaxGetState() {
 		}
 	  	else {
 		    // обработать ошибку
-		    alert( 'ошибка: ' + this.statusText );
+	  		setStatus("No connection!",1,1);
 		    return;
 	    }
 	}
@@ -757,7 +758,29 @@ function ajaxGetAllState() {
 		}
 	  	else {
 		    // обработать ошибку
-		    alert( 'ошибка: ' + this.statusText );
+	  		setStatus("No connection!",1,1);
+		    return;
+	    }
+	}
+}
+
+function ajaxGetThermostats() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '/thermostats.json', true);
+	xhr.send();
+
+	xhr.onreadystatechange = function() {
+		if (this.readyState != 4) return;
+		if (this.status == 200) {
+			if (this.responseText.length > 0) {
+				thermostats = JSON.parse(this.responseText);
+				
+//				update();
+			}
+		}
+	  	else {
+		    // обработать ошибку
+	  		setStatus("No connection!",1,1);
 		    return;
 	    }
 	}
@@ -787,6 +810,8 @@ function onDocumentRedy() {
 	
 	//Init
 	//schedule = server_get2("thermostat_schedule"); //all data * 100 to avoid floating point on the ESP8266 side
+	ajaxGetThermostats();
+	
 	ajaxGetSchedule();
 	scheduleToFloat();
 	
