@@ -127,7 +127,7 @@ function updateclock() {
 }
 
 function setStatus(msg,dur,pri){	 // show msg on status bar
-		if(statusMsg == true){return};
+		if(statusMsg == true){return;};
 		statusMsg= true;
 		if(pri>0){
 			$("#statusView").toggleClass("statusViewAlert",true);
@@ -140,7 +140,7 @@ function setStatus(msg,dur,pri){	 // show msg on status bar
 		$("#statusView").html(msg);
 		dur = dur*1000;
 		if(dur >0){
-			setTimeout(function(){$("#statusView").hide(200);$("#statusView").html(""); statusMsg= false},dur)
+			setTimeout(function(){$("#statusView").hide(200);$("#statusView").html(""); statusMsg= false;},dur);
 		}
 	}
 
@@ -406,7 +406,7 @@ function calc_average_schedule_temperature() {
         for (var z in schedule[d]) {
         	var nextIdx = parseInt(z) < (maxProg - 1) ? parseInt(z) + 1 : 0;
 //            var hours = (schedule[d][z].e - schedule[d][z].s)
-            var hours = (schedule[d][nextIdx].s - schedule[d][z].s)
+            var hours = (schedule[d][nextIdx].s - schedule[d][z].s);
             sum += (schedule[d][z].tt * hours);
         }
     }
@@ -688,7 +688,7 @@ function ajaxGetSchedule() {
 	  		setStatus("No connection!",1,1);
 		    return;
 	    }
-	}
+	};
 }
 
 function ajaxGetState() {
@@ -716,7 +716,7 @@ function ajaxGetState() {
 	  		setStatus("No connection!",1,1);
 		    return;
 	    }
-	}
+	};
 }
 
 function ajaxGetAllState() {
@@ -743,7 +743,7 @@ function ajaxGetAllState() {
 	  		setStatus("No connection!",1,1);
 		    return;
 	    }
-	}
+	};
 }
 
 function ajaxGetThermostats() {
@@ -769,7 +769,7 @@ function ajaxGetThermostats() {
 	  		setStatus("No connection!",1,1);
 		    return;
 	    }
-	}
+	};
 }
 
 function onThermostats() {
@@ -779,7 +779,7 @@ function onThermostats() {
 	ajaxGetSchedule();
 //	scheduleToFloat();
 	
-	ajaxGetAllState()
+	ajaxGetAllState();
 }
 
 function ajaxSaveState(key) {
@@ -787,7 +787,7 @@ function ajaxSaveState(key) {
 	var xhr = new XMLHttpRequest();
 
 	xhr.open('POST', '/state.json?thermostat=' + currThermostat, true);
-	xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8')
+	xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
 	
 	var json = {};
 	json[key] = thermostat[key];
@@ -800,14 +800,14 @@ function ajaxSaveDaySchedule(day) {
 		var xhr = new XMLHttpRequest();
 
 		xhr.open('POST', '/schedule.json?thermostat=' + currThermostat, true);
-		xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8')
+		xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
 		
 		var scheduleMinutes = JSON.parse(JSON.stringify(schedule[day]));
 		for (var z in scheduleMinutes) {
 			scheduleMinutes[z].s = toMinutes(scheduleMinutes[z].s);
 			scheduleMinutes[z].tt *= 100;
 		};
-		var json = {}
+		var json = {};
 		json[day] = scheduleMinutes;
 		
 		xhr.send(JSON.stringify(json));
@@ -831,7 +831,7 @@ function onDocumentRedy() {
 	ajaxGetSchedule();
 	scheduleToFloat();
 	
-	ajaxGetAllState()
+	ajaxGetAllState();
 	
 //	update();
 //	updateclock();
