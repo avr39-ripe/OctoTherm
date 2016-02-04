@@ -776,9 +776,10 @@ function onThermostats() {
 	var select = document.getElementById("thermostats");
 	currThermostat = select.options[select.selectedIndex].value;
 	
-	ajaxGetSchedule();
-//	scheduleToFloat();
+	document.getElementById("slider-segment-block").style.display="none";
+	document.getElementById("slider-segment-block-movepos").style.display="none";
 	
+	ajaxGetSchedule();
 	ajaxGetAllState();
 }
 
@@ -829,17 +830,13 @@ function onDocumentRedy() {
 	ajaxGetThermostats();
 	
 	ajaxGetSchedule();
-	scheduleToFloat();
+	// scheduleToFloat();
 	
 	ajaxGetAllState();
 	
-//	update();
-//	updateclock();
-	
 	setInterval(ajaxGetState, 5000);
 	setInterval(updateclock, 1000);
-	
-//	for (day in schedule) draw_day_slider(day);
+
 }
 
 document.addEventListener('DOMContentLoaded', onDocumentRedy);

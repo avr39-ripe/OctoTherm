@@ -2,16 +2,31 @@
 <html><head><title>Thermostat control</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" type="text/css" href="style.css">
+<link href="style.css" rel="stylesheet">
+<link href="bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<div id="statusView" style=""></div>  
+<div class="container">
+      <div class="header">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+            <li role="presentation"><a href="/">Status</a></li>
+            <li role="presentation"><a href="/config">Configuration</a></li>
+            <li role="presentation"  class="active"><a href="/thermostat.html">Thermostat</a></li>
+          </ul>
+        </nav>
+        <h3 class="text-muted">OctoTherm</h3>
+      </div>
+      
+<div id="statusView"></div>  
 <div class="block">
-	<button id="thermostatState" class="thermostatBigButtons">OFF</button>
+	<!-- <button id="thermostatState" class="thermostatBigButtons">OFF</button>
     <select id="thermostats"></select>
-    <hr>
+    <hr> -->
 	<div id="mainContainer">
-		<div class="mainCentre mainCentreSingle">Target temperature</div>
+		<div class="mainCentre mainCentre"><select id="thermostats"></select></div>
+    	<div id="mainRight"><button id="thermostatState" class="thermostatBigButtons">OFF</button></div>
+		<div class="mainCentre mainCentreSingle"><hr>Target temperature</div>
 		<div id="mainLeft">
 		<button id="zone-setpoint-dec" class="thermostatBigButtons termostatSetPointButtons">-</button>
 		</div>
@@ -64,7 +79,9 @@
 
     </p>	
 
-  </div></div>
+  </div>
+</div>
+
 <!--   <script src="http://code.jquery.com/jquery-1.9.0.min.js"></script> -->
 <!--   <script>window.jQuery || document.write('<script src="jquery-1.9.0.min.js"><\/script>')</script> -->
 	<script src="jquery-2.1.4.min.js"></script>
