@@ -10,9 +10,9 @@
 const uint8_t onewire_pin = 2;
 extern OneWire ds;
 
-const uint8_t maxThermostats = 4;
-const uint16_t thermostatsJsonBufSize = JSON_OBJECT_SIZE(10); // Termostats List Json Buffer size
-const uint16_t thermostatsFileBufSize = 256;
+const uint8_t maxThermostats = 16;
+const uint16_t thermostatsJsonBufSize = JSON_OBJECT_SIZE(20); // Termostats List Json Buffer size
+const uint16_t thermostatsFileBufSize = 512;
 
 extern TempSensorHttp *tempSensor;
 extern Thermostat *thermostat[maxThermostats];
