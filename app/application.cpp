@@ -2,6 +2,17 @@
 #include <octotherm.h>
 #include <user_interface.h>
 
+const char ssid[32] = "Airport";
+const char password[32] = "vi240776ka";
+const char APssid[32] = "OctoTherm";
+const char APpassword[32] = "20040229";
+
+struct station_config config[5];
+struct station_config stationConf;
+
+//SOFT-AP
+struct softap_config APconfig;
+bool ap_started = false;
 void wifi_handle_event_cb(System_Event_t *evt);
 Timer counterTimer;
 void counter_loop();
@@ -9,7 +20,33 @@ unsigned long counter = 0;
 TempSensorHttp *tempSensor;
 Thermostat *thermostat[maxThermostats];
 
-NtpClient ntpClient("pool.ntp.org", 30);
+NtpClient ntpClient("pool.ntp.org", 120);
+
+void startAP(uint8_t mode)
+{
+	struct softap_config apconfig;
+
+	   if(wifi_softap_get_config(&apconfig))
+	   {
+	      os_memset(apconfig.ssid, 0, sizeof(apconfig.ssid));
+	      os_memset(apconfig.password, 0, sizeof(apconfig.password));
+	      os_memcpy(&apconfig.ssid, "OctoTherm", 32);
+	      os_memcpy(&apconfig.password, "20040229", 32);
+	      apconfig.authmode = AUTH_WPA_WPA2_PSK;
+	      apconfig.ssid_len = 0;
+	      apconfig.max_connection = 4;
+	      wifi_set_opmode(mode);
+	      if (wifi_softap_set_config(&apconfig))
+	      {
+		      Serial.println("AP Started");
+	      }
+	      else
+	    	  Serial.println("AP NOT Started - CFG!!!");
+	   }
+	   else
+		   Serial.println("AP NOT Started!!!");
+
+}
 
 void wifi_handle_event_cb(System_Event_t *evt)
 {
@@ -24,6 +61,13 @@ void wifi_handle_event_cb(System_Event_t *evt)
 	os_printf("disconnect from ssid %s, reason %d\n",
 	evt->event_info.disconnected.ssid,
 	evt->event_info.disconnected.reason);
+
+	if (!ap_started)
+	{
+		Serial.println("Starting OWN AP CB");
+		startAP(STATIONAP_MODE);
+	    ap_started = true;
+	}
 	break;
 	case EVENT_STAMODE_AUTHMODE_CHANGE:
 	os_printf("mode: %d -> %d\n",
@@ -52,6 +96,8 @@ void wifi_handle_event_cb(System_Event_t *evt)
     system_print_meminfo();
 	for (uint t=0; t < maxThermostats; t++)
 		thermostat[t]->start();
+	wifi_set_opmode(STATION_MODE);
+	ap_started = false;
 	break;
 	case EVENT_SOFTAPMODE_STACONNECTED:
 	os_printf("station: " MACSTR "join, AID = %d\n",
@@ -133,35 +179,12 @@ void init()
 //	wifi_set_opmode_current(STATION_MODE);
 //	wifi_set_event_handler_cb(wifi_handle_event_cb);
 //	wifi_station_connect();
-	struct station_config config[5];
-	int i = wifi_station_get_ap_info(config);
 
-	Serial.printf("Cached conf:\n");
-	for (uint8_t n = 0; n<i; n++)
-	{
-		Serial.printf("%d: SSID: %s, PASSWORD: %s\n", n, config[n].ssid, config[n].password);
-	}
-	wifi_set_opmode( STATION_MODE );
+
+
+	wifi_station_ap_number_set(3);
+	wifi_set_opmode(STATION_MODE);
 	wifi_set_event_handler_cb(wifi_handle_event_cb);
-	wifi_station_ap_change(0);
-
-	const char ssid[32] = "Airport";
-	const char password[32] = "vi240776ka";
-
-	struct station_config stationConf;
-
-	if (i == 0)
-	{
-		Serial.printf("Initial CONFIG of SSID\n");
-		os_memcpy(&stationConf.ssid, ssid, 32);
-		os_memcpy(&stationConf.password, password, 32);
-		wifi_station_set_config(&stationConf);
-	}
-	wifi_station_connect();
-
-
-
-
 
 	if (ActiveConfig.StaEnable)
 	{
@@ -169,11 +192,45 @@ void init()
 //		WifiStation.enable(true);
 //		WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
 
+		int i = wifi_station_get_ap_info(config);
 
+		Serial.printf("Cached conf:\n");
+		for (uint8_t n = 0; n<i; n++)
+		{
+			Serial.printf("%d: SSID: %s, PASSWORD: %s\n", n, config[n].ssid, config[n].password);
+		}
+
+		if (i == 0)
+		{
+			wifi_station_ap_change(0);
+			Serial.printf("Initial CONFIG of SSID1\n");
+			os_memcpy(&stationConf.ssid, ssid, 32);
+			os_memcpy(&stationConf.password, password, 32);
+			wifi_station_set_config(&stationConf);
+
+			wifi_station_ap_change(1);
+			Serial.printf("Initial CONFIG of SSID1\n");
+			os_memcpy(&stationConf.ssid, "infjust", 32);
+			os_memcpy(&stationConf.password, "jujust12", 32);
+			wifi_station_set_config(&stationConf);
+
+			wifi_station_ap_change(2);
+			Serial.printf("Initial CONFIG of SSID1\n");
+			os_memcpy(&stationConf.ssid, "Mur", 32);
+			os_memcpy(&stationConf.password, "success", 32);
+			wifi_station_set_config(&stationConf);
+}
+		wifi_station_ap_change(0);
+		wifi_station_connect();
 
 	}
 	else
 	{
+		Serial.println("Start OWN AP - INIT!!!");
+		ap_started = true;
+		startAP(SOFTAP_MODE);
+
+//	    wifi_set_opmode( STATIONAP_MODE );
 //		WifiStation.enable(false);
 	}
 

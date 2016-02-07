@@ -6,6 +6,15 @@
 #include <tempsensor.h>
 #include <thermo.h>
 
+//WIFI
+extern struct station_config config[5];
+extern struct station_config stationConf;
+extern bool ap_started;
+//SOFT-AP
+extern void startAP(uint8_t mode);
+extern struct softap_config APconfig;
+extern const char APssid[32];
+extern const char APpassword[32];
 //OneWire stuff
 const uint8_t onewire_pin = 2;
 extern OneWire ds;

@@ -38,20 +38,39 @@ void onConfiguration(HttpRequest &request, HttpResponse &response)
 
 				if (PrevStaEnable && ActiveConfig.StaEnable)
 				{
-					WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
-					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
+//					WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
+//					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
+
+					wifi_station_disconnect();
+					os_memcpy(&stationConf.ssid, ActiveConfig.StaSSID.c_str(), 32);
+					os_memcpy(&stationConf.password, ActiveConfig.StaPassword.c_str(), 32);
+					wifi_station_set_config(&stationConf);
+					wifi_station_connect();
 				}
 				else if (ActiveConfig.StaEnable)
 				{
-					WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
-					WifiStation.enable(true);
-					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
+//					WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
+//					WifiStation.enable(true);
+//					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
+					wifi_station_disconnect();
+					wifi_set_opmode(STATION_MODE);
+					ap_started = false;
+					os_memcpy(&stationConf.ssid, ActiveConfig.StaSSID.c_str(), 32);
+					os_memcpy(&stationConf.password, ActiveConfig.StaPassword.c_str(), 32);
+					wifi_station_set_config(&stationConf);
+					wifi_station_connect();
 				}
 				else
 				{
-					WifiStation.disconnect();
-					WifiAccessPoint.config("OctoTherm", "20040229", AUTH_WPA2_PSK);
-					WifiAccessPoint.enable(true);
+//					WifiStation.disconnect();
+//					WifiAccessPoint.config("OctoTherm", "20040229", AUTH_WPA2_PSK);
+//					WifiAccessPoint.enable(true);
+					if (!ap_started)
+					{
+						Serial.printf("Start OWN AP - WEB!!!");
+						ap_started = true;
+					    startAP(SOFTAP_MODE);
+					}
 				}
 			}
 			if (root["sensorUrl"].success())
