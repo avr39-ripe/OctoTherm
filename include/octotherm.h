@@ -7,10 +7,13 @@
 #include <thermo.h>
 
 //WIFI Stuff
-const uint8_t stationConfigSlots = 4;
+const uint8_t stationCacheSize = 4;
+extern struct station_config configSlots[stationCacheSize];
+extern uint8_t stationCurrentCacheId;
+extern uint8_t currentStaCacheSize;
 extern bool ap_started;
 extern void enableWifiStation(bool enable, bool save = false);
-extern void configWifiStation(String ssid, String password, uint8_t slot, uint8_t start = true);
+extern void configWifiStation(String ssid, String password, uint8_t start = true);
 extern void enableWifiAccessPoint(bool enable, bool save = false);
 
 //OneWire stuff

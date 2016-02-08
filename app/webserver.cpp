@@ -40,7 +40,7 @@ void onConfiguration(HttpRequest &request, HttpResponse &response)
 				{
 //					WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
 //					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
-					configWifiStation(ActiveConfig.StaSSID, ActiveConfig.StaPassword, 0, true);
+					configWifiStation(ActiveConfig.StaSSID, ActiveConfig.StaPassword, true);
 				}
 				else if (ActiveConfig.StaEnable)
 				{
@@ -48,12 +48,13 @@ void onConfiguration(HttpRequest &request, HttpResponse &response)
 //					WifiStation.enable(true);
 //					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
 					enableWifiStation(true,true);
-					configWifiStation(ActiveConfig.StaSSID, ActiveConfig.StaPassword, 0, true);
+					configWifiStation(ActiveConfig.StaSSID, ActiveConfig.StaPassword, true);
 				}
 				else
 				{
 //					system_restore();
 //					system_restart();
+					enableWifiStation(false,true);
 					enableWifiAccessPoint(true,true);
 //					WifiStation.disconnect();
 //					WifiAccessPoint.config("OctoTherm", "20040229", AUTH_WPA2_PSK);
