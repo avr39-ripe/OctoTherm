@@ -38,20 +38,26 @@ void onConfiguration(HttpRequest &request, HttpResponse &response)
 
 				if (PrevStaEnable && ActiveConfig.StaEnable)
 				{
-					WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
-					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
+//					WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
+//					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
+					configWifiStation(ActiveConfig.StaSSID, ActiveConfig.StaPassword, 0, true);
 				}
 				else if (ActiveConfig.StaEnable)
 				{
-					WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
-					WifiStation.enable(true);
-					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
+//					WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
+//					WifiStation.enable(true);
+//					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
+					enableWifiStation(true,true);
+					configWifiStation(ActiveConfig.StaSSID, ActiveConfig.StaPassword, 0, true);
 				}
 				else
 				{
-					WifiStation.disconnect();
-					WifiAccessPoint.config("OctoTherm", "20040229", AUTH_WPA2_PSK);
-					WifiAccessPoint.enable(true);
+//					system_restore();
+//					system_restart();
+					enableWifiAccessPoint(true,true);
+//					WifiStation.disconnect();
+//					WifiAccessPoint.config("OctoTherm", "20040229", AUTH_WPA2_PSK);
+//					WifiAccessPoint.enable(true);
 				}
 			}
 			if (root["sensorUrl"].success())

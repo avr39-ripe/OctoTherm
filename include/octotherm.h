@@ -6,6 +6,13 @@
 #include <tempsensor.h>
 #include <thermo.h>
 
+//WIFI Stuff
+const uint8_t stationConfigSlots = 4;
+extern bool ap_started;
+extern void enableWifiStation(bool enable, bool save = false);
+extern void configWifiStation(String ssid, String password, uint8_t slot, uint8_t start = true);
+extern void enableWifiAccessPoint(bool enable, bool save = false);
+
 //OneWire stuff
 const uint8_t onewire_pin = 2;
 extern OneWire ds;
