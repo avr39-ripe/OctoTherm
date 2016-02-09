@@ -40,6 +40,7 @@ void onConfiguration(HttpRequest &request, HttpResponse &response)
 				{
 //					WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
 //					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
+					enableWifiStation(true);
 					configWifiStation(ActiveConfig.StaSSID, ActiveConfig.StaPassword, true);
 				}
 				else if (ActiveConfig.StaEnable)

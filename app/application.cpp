@@ -10,14 +10,16 @@ Thermostat *thermostat[maxThermostats];
 NtpClient ntpClient("pool.ntp.org", 30);
 
 bool ap_started = false;
-uint8_t stationCurrentCacheId = 0;
-uint8_t currentStaCacheSize = 0;
-struct station_config configSlots[stationCacheSize];
 
 void enableWifiStation(bool enable, bool save)
 {
-	uint8 opmode = wifi_get_opmode_default() & ~STATION_MODE;
+//	uint8 opmode = wifi_get_opmode_default() & ~STATION_MODE;
+	uint8 opmode = wifi_get_opmode_default();
+	Serial.printf("STA-OPMODE_DEFAULT: %d\n", opmode);
+	opmode &= ~STATION_MODE;
+	Serial.printf("STA-OPMODE_CUT-STA: %d\n", opmode);
 	if (enable) opmode |= STATION_MODE;
+	Serial.printf("STA-OPMODE-CHANGE: %d\n", opmode);
 	if (save)
 		wifi_set_opmode(opmode);
 	else
@@ -26,8 +28,13 @@ void enableWifiStation(bool enable, bool save)
 
 void enableWifiAccessPoint(bool enable, bool save)
 {
-	uint8 opmode = wifi_get_opmode_default() & ~SOFTAP_MODE;
+//	uint8 opmode = wifi_get_opmode_default() & ~SOFTAP_MODE;
+	uint8 opmode = wifi_get_opmode_default();
+	Serial.printf("AP-OPMODE_DEFAULT: %d\n", opmode);
+	opmode &= ~SOFTAP_MODE;
+	Serial.printf("AP-OPMODE_CUT-AP: %d\n", opmode);
 	if (enable) opmode |= SOFTAP_MODE;
+	Serial.printf("AP-OPMODE-CHANGE: %d\n", opmode);
 	if (save)
 		wifi_set_opmode(opmode);
 	else
@@ -36,8 +43,6 @@ void enableWifiAccessPoint(bool enable, bool save)
 
 void wifi_handle_event_cb(System_Event_t *evt)
 {
-	struct station_config stationConf;
-
 	os_printf("event %x\n", evt->event);
 
 	switch (evt->event)
@@ -51,16 +56,7 @@ void wifi_handle_event_cb(System_Event_t *evt)
 		os_printf("disconnect from ssid %s, reason %d\n",
 		evt->event_info.disconnected.ssid,
 		evt->event_info.disconnected.reason);
-		if(stationCurrentCacheId < currentStaCacheSize)
-		{
-			wifi_station_disconnect();
-			wifi_station_ap_change(stationCurrentCacheId);
-			Serial.printf("Try cached station %d: SSID: %s, PASSWORD: %s\n", stationCurrentCacheId, configSlots[stationCurrentCacheId].ssid, configSlots[stationCurrentCacheId].password);
-			wifi_station_connect();
-
-			stationCurrentCacheId++;
-		}
-		else if (!ap_started)
+		if (!ap_started)
 		{
 			Serial.println("Starting OWN AP CB");
 			wifi_station_disconnect();
@@ -68,6 +64,10 @@ void wifi_handle_event_cb(System_Event_t *evt)
 			ap_started = true;
 			wifi_station_connect();
 		}
+
+//		for (uint t=0; t < maxThermostats; t++)
+//			thermostat[t]->stop();
+
 		break;
 	case EVENT_STAMODE_AUTHMODE_CHANGE:
 		os_printf("mode: %d -> %d\n",
@@ -80,17 +80,16 @@ void wifi_handle_event_cb(System_Event_t *evt)
 		IP2STR(&evt->event_info.got_ip.mask),
 		IP2STR(&evt->event_info.got_ip.gw));
 		os_printf("\n");
-		stationCurrentCacheId = 0;
 
-//		wifi_station_ap_change(0);
-		wifi_station_get_config(&stationConf);
-		wifi_station_set_config(&stationConf);
-
+		if (ap_started)
+		{
+			enableWifiAccessPoint(false,true);
+			ap_started = false;
+		}
 
 		for (uint t=0; t < maxThermostats; t++)
 			thermostat[t]->start();
-		enableWifiAccessPoint(false);
-		ap_started = false;
+
 		break;
 	case EVENT_SOFTAPMODE_STACONNECTED:
 		os_printf("station: " MACSTR "join, AID = %d\n",
@@ -108,7 +107,7 @@ void wifi_handle_event_cb(System_Event_t *evt)
 
 }
 
-void configWifiStation(String ssid, String password, uint8_t start)
+void configWifiStation(String ssid, String password, bool start)
 {
 	struct station_config stationConf;
 
@@ -116,7 +115,6 @@ void configWifiStation(String ssid, String password, uint8_t start)
 	opmode = wifi_get_opmode_default();
 	wifi_set_opmode_current(opmode | STATION_MODE); //enable station for configuration
 
-//	wifi_station_ap_change(3);
 	os_memcpy(&stationConf.ssid, ssid.c_str(), 32);
 	os_memcpy(&stationConf.password, password.c_str(), 32);
 	wifi_station_set_config(&stationConf);
@@ -133,40 +131,40 @@ void initialStationConfig()
 
 	uint8_t opmode = 0;
 	opmode = wifi_get_opmode_default();
-	wifi_set_opmode_current(opmode | STATION_MODE); //enable station for configuration
+//	wifi_set_opmode_current(opmode | STATION_MODE); //enable station for configuration
 
-	currentStaCacheSize = wifi_station_get_ap_info(configSlots);
-
-	if (currentStaCacheSize == 0)
-	{
-		wifi_set_opmode(STATION_MODE); //Initialy enable station mode by default!
-
-		Serial.printf("Initial CONFIG\n");
-		os_memcpy(&stationConf.ssid, (const char *)WIFI_SSID, 32);
-		os_memcpy(&stationConf.password, (const char *)WIFI_PWD, 32);
-		wifi_station_set_config(&stationConf);
-	}
-	else
-	{
-		Serial.printf("Cached station configuration:\n");
-		for (uint8_t n = 0; n < currentStaCacheSize; n++)
-		{
-			Serial.printf("Slot %d: SSID: %s, PASSWORD: %s\n", n, configSlots[n].ssid, configSlots[n].password);
-		}
-	}
+//	wifi_station_get_config_default(&stationConf)
+//
+//	if (os_strncmp((const char *)stationConf.ssid, (const char *)WIFI_SSID, 32) != 0)
+//	{
+//		wifi_set_opmode(STATION_MODE); //Initialy enable station mode by default!
+//
+//		Serial.printf("Initial CONFIG\n");
+//		os_memcpy(&stationConf.ssid, (const char *)"Mur", 32);
+//		os_memcpy(&stationConf.password, (const char *)"success_60", 32);
+//		wifi_station_set_config(&stationConf);
+//	}
+//	else
+//	{
+//		Serial.printf("Cached station configuration:\n");
+//		for (uint8_t n = 0; n < currentStaCacheSize; n++)
+//		{
+//			Serial.printf("Slot %d: SSID: %s, PASSWORD: %s\n", n, configSlots[n].ssid, configSlots[n].password);
+//		}
+//	}
 
 	if (opmode & STATION_MODE)
 	{
 		if (wifi_station_get_config_default(&stationConf))
 		{
-			Serial.printf("Connect initially");
+			Serial.printf("Connect initially\n");
 			wifi_station_connect(); // if station enabled by default - try to connect as defaultSlot config
 		}
 		else
-			Serial.println("Connection failed! - set station config");
+			Serial.println("Connection failed! - get station config");
 	}
-	else
-		wifi_set_opmode_current(opmode); //restore default mode
+//	else
+//		wifi_set_opmode_current(opmode); //restore default mode
 }
 
 void initialAccessPointConfig()
@@ -181,7 +179,7 @@ void initialAccessPointConfig()
 	{
 		if (os_strncmp((const char *)apconfig.ssid, (const char *)"OctoTherm", 32) != 0)
 		{
-			Serial.printf("Initialy config AccessPoint");
+			Serial.printf("Initialy config AccessPoint\n");
 			os_memset(apconfig.ssid, 0, sizeof(apconfig.ssid));
 			os_memset(apconfig.password, 0, sizeof(apconfig.password));
 			os_memcpy(&apconfig.ssid, "OctoTherm", 32);
@@ -213,7 +211,7 @@ void init()
 	Serial.systemDebugOutput(false);
 	Serial.commandProcessing(false);
 
-	wifi_station_ap_number_set(stationCacheSize); // set cache size for station configs
+//	wifi_station_ap_number_set(stationCacheSize); // set cache size for station configs
 	Serial.printf("COMPILE-IN SSID: %s, PASSWORD: %s\n", WIFI_SSID, WIFI_PWD);
 
 	SystemClock.setTimeZone(2);
@@ -261,7 +259,9 @@ void init()
 
 	if (ActiveConfig.StaEnable)
 	{
-//		enableWifiStation(true);
+		enableWifiAccessPoint(false);
+		enableWifiStation(true);
+
 //		WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
 ////		WifiStation.enableDHCP(false);
 ////		WifiStation.setIP((String)"192.168.31.204", (String)"255.255.255.0", (String)"192.168.31.1");
@@ -271,8 +271,8 @@ void init()
 	}
 	else
 	{
-//		enableWifiStation(false);
-//		enableWifiAccessPoint(true);
+		enableWifiStation(false);
+		enableWifiAccessPoint(true);
 //		WifiStation.enable(false);
 	}
 
