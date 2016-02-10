@@ -202,7 +202,7 @@ void initialAccessPointConfig()
 	else
 		Serial.println("AP NOT Started! - Get config failed!");
 
-	wifi_set_opmode(opmode); //restore default opmode
+	wifi_set_opmode_current(opmode); //restore current opmode
 }
 void init()
 {
