@@ -83,10 +83,12 @@ void wifi_handle_event_cb(System_Event_t *evt)
 
 		if (ap_started)
 		{
-			enableWifiAccessPoint(false,true);
+			enableWifiAccessPoint(false);
 			ap_started = false;
 		}
 
+		ntpClient.requestTime();
+		tempSensor->start();
 		for (uint t=0; t < maxThermostats; t++)
 			thermostat[t]->start();
 
@@ -285,7 +287,9 @@ void init()
 
 void counter_loop()
 {
-	counter++;
+//	counter++;
+	counter = wifi_station_get_rssi();
+	Serial.printf("RSSI: %d\n", counter);
 }
 
 void StaConnectOk()
