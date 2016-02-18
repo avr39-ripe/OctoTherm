@@ -7,7 +7,7 @@ unsigned long counter = 0;
 TempSensorHttp *tempSensor;
 Thermostat *thermostat[maxThermostats];
 
-NtpClient ntpClient("pool.ntp.org", 30);
+NtpClient ntpClient("pool.ntp.org", 300);
 
 bool ap_started = false;
 
@@ -18,12 +18,19 @@ void enableWifiStation(bool enable, bool save)
 	Serial.printf("STA-OPMODE_DEFAULT: %d\n", opmode);
 	opmode &= ~STATION_MODE;
 	Serial.printf("STA-OPMODE_CUT-STA: %d\n", opmode);
-	if (enable) opmode |= STATION_MODE;
+	if (enable)
+	{
+		opmode |= STATION_MODE;
+	}
 	Serial.printf("STA-OPMODE-CHANGE: %d\n", opmode);
 	if (save)
+	{
 		wifi_set_opmode(opmode);
+	}
 	else
+	{
 		wifi_set_opmode_current(opmode);
+	}
 }
 
 void enableWifiAccessPoint(bool enable, bool save)
@@ -33,12 +40,19 @@ void enableWifiAccessPoint(bool enable, bool save)
 	Serial.printf("AP-OPMODE_DEFAULT: %d\n", opmode);
 	opmode &= ~SOFTAP_MODE;
 	Serial.printf("AP-OPMODE_CUT-AP: %d\n", opmode);
-	if (enable) opmode |= SOFTAP_MODE;
+	if (enable)
+	{
+		opmode |= SOFTAP_MODE;
+	}
 	Serial.printf("AP-OPMODE-CHANGE: %d\n", opmode);
 	if (save)
+	{
 		wifi_set_opmode(opmode);
+	}
 	else
+	{
 		wifi_set_opmode_current(opmode);
+	}
 }
 
 void wifi_handle_event_cb(System_Event_t *evt)
@@ -89,8 +103,8 @@ void wifi_handle_event_cb(System_Event_t *evt)
 
 		ntpClient.requestTime();
 		tempSensor->start();
-		for (uint t=0; t < maxThermostats; t++)
-			thermostat[t]->start();
+		for (auto _thermostat: thermostat)
+			_thermostat->start();
 
 		break;
 	case EVENT_SOFTAPMODE_STACONNECTED:
@@ -175,12 +189,13 @@ void initialAccessPointConfig()
 
 	uint8_t opmode = 0;
 	opmode = wifi_get_opmode_default();
-	wifi_set_opmode_current(opmode | SOFTAP_MODE); //enable station for configuration
 
 	if(wifi_softap_get_config_default(&apconfig))
 	{
 		if (os_strncmp((const char *)apconfig.ssid, (const char *)"OctoTherm", 32) != 0)
 		{
+			wifi_set_opmode_current(opmode | SOFTAP_MODE); //enable station for configuration
+
 			Serial.printf("Initialy config AccessPoint\n");
 			os_memset(apconfig.ssid, 0, sizeof(apconfig.ssid));
 			os_memset(apconfig.password, 0, sizeof(apconfig.password));
@@ -196,15 +211,16 @@ void initialAccessPointConfig()
 				Serial.println("AP Configured!");
 			}
 			else
+			{
 				Serial.println("AP NOT Configured - Config save failed!");
+			}
+			wifi_set_opmode_current(opmode); //restore current opmode
 		}
 		else
 			Serial.printf("AccessPoint already configured.\n");
 	}
 	else
 		Serial.println("AP NOT Started! - Get config failed!");
-
-	wifi_set_opmode_current(opmode); //restore current opmode
 }
 void init()
 {
@@ -232,31 +248,29 @@ void init()
 
 	for(uint8_t i = 0; i< 7; i++)
 	{
-		for (uint t=0; t < maxThermostats; t++)
+		for (auto _thermostat: thermostat)
 		{
-			thermostat[t]->_schedule[i][0].start = 0;
-			thermostat[t]->_schedule[i][0].targetTemp = 800;
-			thermostat[t]->_schedule[i][1].start = 360;
-			thermostat[t]->_schedule[i][1].targetTemp = 1800;
-			thermostat[t]->_schedule[i][2].start = 540;
-			thermostat[t]->_schedule[i][2].targetTemp = 1200;
-			thermostat[t]->_schedule[i][3].start = 720;
-			thermostat[t]->_schedule[i][3].targetTemp = 1500;
-			thermostat[t]->_schedule[i][4].start = 1020;
-			thermostat[t]->_schedule[i][4].targetTemp = 1800;
-			thermostat[t]->_schedule[i][5].start = 1320;
-			thermostat[t]->_schedule[i][5].targetTemp = 800;
+			_thermostat->_schedule[i][0].start = 0;
+			_thermostat->_schedule[i][0].targetTemp = 800;
+			_thermostat->_schedule[i][1].start = 360;
+			_thermostat->_schedule[i][1].targetTemp = 1800;
+			_thermostat->_schedule[i][2].start = 540;
+			_thermostat->_schedule[i][2].targetTemp = 1200;
+			_thermostat->_schedule[i][3].start = 720;
+			_thermostat->_schedule[i][3].targetTemp = 1500;
+			_thermostat->_schedule[i][4].start = 1020;
+			_thermostat->_schedule[i][4].targetTemp = 1800;
+			_thermostat->_schedule[i][5].start = 1320;
+			_thermostat->_schedule[i][5].targetTemp = 800;
+
+			_thermostat->loadStateCfg();
+			_thermostat->loadScheduleBinCfg();
 		}
 	}
 
-	for (uint t=0; t < maxThermostats; t++)
-	{
-		thermostat[t]->loadStateCfg();
-		thermostat[t]->loadScheduleBinCfg();
-	}
-
 	wifi_set_event_handler_cb(wifi_handle_event_cb);
-	initialStationConfig();
+
+//	initialStationConfig();
 	initialAccessPointConfig();
 
 	if (ActiveConfig.StaEnable)
