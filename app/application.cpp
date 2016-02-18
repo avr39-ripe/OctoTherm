@@ -70,13 +70,20 @@ void wifi_handle_event_cb(System_Event_t *evt)
 		os_printf("disconnect from ssid %s, reason %d\n",
 		evt->event_info.disconnected.ssid,
 		evt->event_info.disconnected.reason);
-		if (!ap_started)
+		if (!WifiAccessPoint.isEnabled())
 		{
 			Serial.println("Starting OWN AP CB");
-			wifi_station_disconnect();
-			enableWifiAccessPoint(true);
-			ap_started = true;
-			wifi_station_connect();
+//			wifi_station_disconnect();
+			WifiStation.disconnect();
+
+//			enableWifiAccessPoint(true);
+			WifiAccessPoint.enable(true);
+
+//			ap_started = true;
+
+//			wifi_station_connect();
+			WifiStation.connect();
+
 		}
 
 //		for (uint t=0; t < maxThermostats; t++)
@@ -95,10 +102,12 @@ void wifi_handle_event_cb(System_Event_t *evt)
 		IP2STR(&evt->event_info.got_ip.gw));
 		os_printf("\n");
 
-		if (ap_started)
+		if (WifiAccessPoint.isEnabled())
 		{
-			enableWifiAccessPoint(false);
-			ap_started = false;
+//			enableWifiAccessPoint(false);
+			WifiAccessPoint.enable(false);
+
+//			ap_started = false;
 		}
 
 		ntpClient.requestTime();
@@ -271,12 +280,13 @@ void init()
 	wifi_set_event_handler_cb(wifi_handle_event_cb);
 
 //	initialStationConfig();
-	initialAccessPointConfig();
+
+//TODO:	initialAccessPointConfig();
 
 	if (ActiveConfig.StaEnable)
 	{
-		enableWifiAccessPoint(false);
-		enableWifiStation(true);
+//		enableWifiAccessPoint(false);
+//		enableWifiStation(true);
 
 //		WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
 ////		WifiStation.enableDHCP(false);
@@ -287,8 +297,8 @@ void init()
 	}
 	else
 	{
-		enableWifiStation(false);
-		enableWifiAccessPoint(true);
+//		enableWifiStation(false);
+//		enableWifiAccessPoint(true);
 //		WifiStation.enable(false);
 	}
 
