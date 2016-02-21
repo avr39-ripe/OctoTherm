@@ -38,48 +38,26 @@ void onConfiguration(HttpRequest &request, HttpResponse &response)
 
 				if (PrevStaEnable && ActiveConfig.StaEnable)
 				{
-//					WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
-//					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
-//					enableWifiStation(true);
 					WifiStation.enable(true);
-//					enableWifiAccessPoint(false);
 					WifiAccessPoint.enable(false);
-//					ap_started = false;
-//					configWifiStation(ActiveConfig.StaSSID, ActiveConfig.StaPassword, true);
 					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
 				}
 				else if (ActiveConfig.StaEnable)
 				{
-//					WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
-//					WifiStation.enable(true);
-//					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
-//					enableWifiStation(true,true);
-
 					WifiStation.enable(true, true);
-
-//					enableWifiAccessPoint(false,true);
 					WifiAccessPoint.enable(false, true);
-//					ap_started = false;
-//					configWifiStation(ActiveConfig.StaSSID, ActiveConfig.StaPassword, true);
 					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
 				}
 				else
 				{
-//					system_restore();
-//					system_restart();
-//					enableWifiStation(false,true);
-//					enableWifiAccessPoint(true,true);
-//					ap_started = true;
 					WifiStation.enable(false, true);
 					WifiAccessPoint.enable(true, true);
-//					WifiStation.disconnect();
-//					WifiAccessPoint.config("OctoTherm", "20040229", AUTH_WPA2_PSK);
-//					WifiAccessPoint.enable(true);
 				}
 			}
 			if (root["sensorUrl"].success())
 			{
 				ActiveConfig.sensorUrl = String((const char *)root["sensorUrl"]);
+				system_restart();
 			}
 		}
 		saveConfig(ActiveConfig);
