@@ -38,25 +38,26 @@ void onConfiguration(HttpRequest &request, HttpResponse &response)
 
 				if (PrevStaEnable && ActiveConfig.StaEnable)
 				{
-					WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
+					WifiStation.enable(true);
+					WifiAccessPoint.enable(false);
 					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
 				}
 				else if (ActiveConfig.StaEnable)
 				{
-					WifiStation.waitConnection(StaConnectOk, StaConnectTimeout, StaConnectFail);
-					WifiStation.enable(true);
+					WifiStation.enable(true, true);
+					WifiAccessPoint.enable(false, true);
 					WifiStation.config(ActiveConfig.StaSSID, ActiveConfig.StaPassword);
 				}
 				else
 				{
-					WifiStation.disconnect();
-					WifiAccessPoint.config("OctoTherm", "20040229", AUTH_WPA2_PSK);
-					WifiAccessPoint.enable(true);
+					WifiStation.enable(false, true);
+					WifiAccessPoint.enable(true, true);
 				}
 			}
 			if (root["sensorUrl"].success())
 			{
 				ActiveConfig.sensorUrl = String((const char *)root["sensorUrl"]);
+				system_restart();
 			}
 		}
 		saveConfig(ActiveConfig);
@@ -87,7 +88,11 @@ void onFile(HttpRequest &request, HttpResponse &response)
 		file = file.substring(1);
 
 	if (file[0] == '.')
-		response.forbidden();
+	{
+//		response.forbidden();
+		response.setCache(86400, true); // It's important to use cache for better performance.
+		response.sendFile(file);
+	}
 	else
 	{
 		response.setCache(86400, true); // It's important to use cache for better performance.
@@ -107,6 +112,36 @@ void onAJAXGetState(HttpRequest &request, HttpResponse &response)
 }
 
 
+void onStateJson(HttpRequest &request, HttpResponse &response)
+{
+	uint8_t currThermostat = request.getQueryParameter("thermostat").toInt();
+	thermostat[currThermostat]->onStateCfg(request,response);
+}
+
+void onScheduleJson(HttpRequest &request, HttpResponse &response)
+{
+	uint8_t currThermostat = request.getQueryParameter("thermostat").toInt();
+	thermostat[currThermostat]->onScheduleCfg(request,response);
+}
+
+void onThermostatsJson(HttpRequest &request, HttpResponse &response)
+{
+	StaticJsonBuffer<thermostatsJsonBufSize> jsonBuffer;
+	JsonObject& root = jsonBuffer.createObject();
+	for (uint t=0; t < maxThermostats; t++)
+	{
+		root[(String)t] = thermostat[t]->getName();
+
+	}
+	char buf[scheduleFileBufSize];
+	root.printTo(buf, sizeof(buf));
+
+	response.setHeader("Access-Control-Allow-Origin", "*");
+	response.setContentType(ContentType::JSON);
+	response.sendString(buf);
+
+
+}
 void startWebServer()
 {
 	if (serverStarted) return;
@@ -116,6 +151,9 @@ void startWebServer()
 	server.addPath("/config", onConfiguration);
 	server.addPath("/config.json", onConfiguration_json);
 	server.addPath("/state", onAJAXGetState);
+	server.addPath("/state.json", onStateJson);
+	server.addPath("/schedule.json", onScheduleJson);
+	server.addPath("/thermostats.json", onThermostatsJson);
 	server.setDefaultHandler(onFile);
 	serverStarted = true;
 
