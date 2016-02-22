@@ -16,33 +16,13 @@ void initialAccessPointConfig()
 {
 	struct softap_config apconfig;
 
-	uint8_t opmode = 0;
-	opmode = wifi_get_opmode_default();
-
 	if(wifi_softap_get_config_default(&apconfig))
 	{
 		if (os_strncmp((const char *)apconfig.ssid, (const char *)"OctoTherm", 32) != 0)
 		{
-			wifi_set_opmode_current(opmode | SOFTAP_MODE); //enable station for configuration
-
-			Serial.printf("Initialy config AccessPoint\n");
-			os_memset(apconfig.ssid, 0, sizeof(apconfig.ssid));
-			os_memset(apconfig.password, 0, sizeof(apconfig.password));
-			os_memcpy(&apconfig.ssid, "OctoTherm", 32);
-			os_memcpy(&apconfig.password, "20040229", 32);
-			apconfig.authmode = AUTH_WPA_WPA2_PSK;
-			apconfig.ssid_len = 0;
-			apconfig.max_connection = 4;
-
-			if (wifi_softap_set_config(&apconfig))
-			{
-				Serial.println("AP Configured!");
-			}
-			else
-			{
-				Serial.println("AP NOT Configured - Config save failed!");
-			}
-			wifi_set_opmode_current(opmode); //restore current opmode
+			WifiAccessPoint.config("OctoTherm", "20040229", AUTH_WPA2_PSK);
+			WifiStation.enable(true, true);
+			WifiAccessPoint.enable(false, true);
 		}
 		else
 			Serial.printf("AccessPoint already configured.\n");
