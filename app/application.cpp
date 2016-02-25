@@ -12,6 +12,11 @@ NtpClient ntpClient("pool.ntp.org", 300);
 void STADisconnect(String ssid, uint8_t ssid_len, uint8_t bssid[6], uint8_t reason);
 void STAGotIP(IPAddress ip, IPAddress mask, IPAddress gateway);
 
+void onOfficeStateChange(bool state)
+{
+	Serial.printf("Office state changed!\n");
+}
+
 void initialAccessPointConfig()
 {
 	struct softap_config apconfig;
@@ -52,6 +57,7 @@ void init()
 
 	tempSensor = new TempSensorHttp(ActiveConfig.sensorUrl);
 	thermostat[0] = new Thermostat(*tempSensor,"Office", 4000);
+	thermostat[0]->onStateChange(onOfficeStateChange);
 	thermostat[1] = new Thermostat(*tempSensor,"Kitchen", 4000);
 	thermostat[2] = new Thermostat(*tempSensor,"Hall", 4000);
 	thermostat[3] = new Thermostat(*tempSensor,"Bedroom", 4000);
