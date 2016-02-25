@@ -10,6 +10,8 @@
 #include <SmingCore/SmingCore.h>
 #include <tempsensor.h>
 
+typedef Delegate<void(bool state)> onStateChangeDelegate;
+
 const uint8_t maxProg = 6;
 const uint8_t antiFrozen = 5; // temperature to maintain when thermostat is not _active to prevent system freeze
 
@@ -50,6 +52,7 @@ public:
 	SchedUnit _schedule[7][maxProg]; // 7 day X maxProg programs in schedule
 	uint8_t getState() { return _state; };
 	String getName() { return _name; };
+	void onStateChange(onStateChangeDelegate delegateFunction);
 private:
 	String _name; // some text description of thermostat
 	bool _active; //thermostat active (true), ON,  works, updates, changes its _state or turned OFF
@@ -62,6 +65,7 @@ private:
 	TempSensor *_tempSensor;
 	bool _prevManual = false; // previous state of _manual
 	uint8_t _manualProg = 0; // program that was when manual mode turned on, when program change, manual mode will turn off
+	onStateChangeDelegate onChangeState = nullptr;
 };
 
 

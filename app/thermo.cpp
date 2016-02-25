@@ -22,6 +22,7 @@ void Thermostat::check()
 	float currTemp = _tempSensor->getTemp();
 	float targetTemp = 0;
 	uint8_t currentProg = 0;
+	bool prevState = _state;
 
 	if (!_active)
 	{
@@ -91,6 +92,11 @@ void Thermostat::check()
 	if (currTemp <= targetTemp - (float)(_targetTempDelta / 100.0))
 		_state = true;
 	Serial.printf(" State: %s\n", _state ? "true" : "false");
+	if (prevState != _state && onChangeState)
+	{
+		Serial.printf("onChangeState Delegate/CB called!\n");
+		onChangeState(_state);
+	}
 }
 
 void Thermostat::start()
@@ -324,4 +330,9 @@ void Thermostat::loadScheduleBinCfg()
 	fileSeek(file, 0, eSO_FileStart);
 	fileRead(file, _schedule, sizeof(SchedUnit)*6*7);
 	fileClose(file);
+}
+
+void Thermostat::onStateChange(onStateChangeDelegate delegateFunction)
+{
+	onChangeState = delegateFunction;
 }
