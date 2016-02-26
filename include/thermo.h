@@ -10,7 +10,7 @@
 #include <SmingCore/SmingCore.h>
 #include <tempsensor.h>
 
-typedef Delegate<void(bool state)> onStateChangeDelegate;
+typedef Delegate<void(uint8_t state)> onStateChangeDelegate;
 
 const uint8_t maxProg = 6;
 const uint8_t antiFrozen = 5; // temperature to maintain when thermostat is not _active to prevent system freeze

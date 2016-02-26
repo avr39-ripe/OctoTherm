@@ -59,7 +59,7 @@ void init()
 
 	tempSensor = new TempSensorHttp(ActiveConfig.sensorUrl);
 	thermostat[0] = new Thermostat(*tempSensor,"Office", 4000);
-	thermostat[0]->onStateChange(onOfficeStateChange);
+	thermostat[0]->onStateChange(onStateChangeDelegate(&SwitchHttp::setState, &officeSwitch));
 	thermostat[1] = new Thermostat(*tempSensor,"Kitchen", 4000);
 	thermostat[2] = new Thermostat(*tempSensor,"Hall", 4000);
 	thermostat[3] = new Thermostat(*tempSensor,"Bedroom", 4000);
