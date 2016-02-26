@@ -6,6 +6,7 @@ void counter_loop();
 unsigned long counter = 0;
 TempSensorHttp *tempSensor;
 Thermostat *thermostat[maxThermostats];
+SwitchHttp officeSwitch("http://10.2.113.125/set_state");
 
 NtpClient ntpClient("pool.ntp.org", 300);
 
@@ -14,7 +15,8 @@ void STAGotIP(IPAddress ip, IPAddress mask, IPAddress gateway);
 
 void onOfficeStateChange(bool state)
 {
-	Serial.printf("Office state changed!\n");
+	Serial.printf("Office state changed to %s!\n", state ? "true" : "false");
+	officeSwitch.setState(state);
 }
 
 void initialAccessPointConfig()
@@ -126,4 +128,5 @@ void STAGotIP(IPAddress ip, IPAddress mask, IPAddress gateway)
 	tempSensor->start();
 	for (auto _thermostat: thermostat)
 		_thermostat->start();
+	officeSwitch.start();
 }

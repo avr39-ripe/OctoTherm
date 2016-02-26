@@ -4,6 +4,7 @@
 #include <SmingCore/SmingCore.h>
 #include <Libraries/OneWire/OneWire.h>
 #include <tempsensor.h>
+#include <switch.h>
 #include <thermo.h>
 
 //WIFI Stuff
