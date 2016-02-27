@@ -17,8 +17,8 @@ namespace SwitchState
 
 namespace SwitchConnectionStatus
 {
-	const uint8_t CONNECTED = 0;
-	const uint8_t DISCONNECTED = 1;
+	const uint8_t CONNECTED = 1;
+	const uint8_t DISCONNECTED = 0;
 }
 const uint16_t switchJsonBufSize = JSON_OBJECT_SIZE(10);
 
