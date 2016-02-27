@@ -24,73 +24,91 @@ void Thermostat::check()
 	uint8_t currentProg = 0;
 	bool prevState = _state;
 
-	if (!_active)
+	if (_tempSensor->isHealthy())
 	{
-		Serial.println("active = false");
-		targetTemp = antiFrozen;
+		_tempSensorHealthy = maxUnhealthyGetTemp;
+	}
+	else if (_tempSensorHealthy > 0)
+	{
+		_tempSensorHealthy--;
+		Serial.printf("Name: %s - TEMPSENSOR ERROR!, %d\n", _name.c_str(), _tempSensorHealthy);
+	}
+
+	if (!_tempSensorHealthy)
+	{
+		_state = true; // If we lost remote tempsensor we switch termostat on instantly
+		Serial.printf("Name: %s - TEMPSENSOR ERROR! - WE LOST IT!\n", _name.c_str());
 	}
 	else
 	{
-		DateTime now = SystemClock.now(eTZ_Local);
-		SchedUnit daySchedule[maxProg] = _schedule[now.DayofWeek];
-		uint16_t nowMinutes = now.Hour * 60 + now.Minute;
-		Serial.printf("Name: %s, DateTime: %s,", _name.c_str(), now.toFullDateTimeString().c_str());
-
-		for (uint8_t i = 0; i < maxProg; i++)
+		if (!_active)
 		{
-			uint8_t nextIdx = i < (maxProg - 1) ? i + 1 : 0;
-//			Serial.printf("I: %d, nextIdx: %d, nowMinutes: %d, daySchedule[i].minutes: %d, daySchedule[nextIdx].minutes: %d ",i, nextIdx, nowMinutes, daySchedule[i].start, daySchedule[nextIdx].start);
-
-			bool dayTransit = daySchedule[i].start > daySchedule[nextIdx].start;
-//			Serial.printf("dayTransit: %d\n", dayTransit);
-
-			if ( ((!dayTransit) && ((nowMinutes >= daySchedule[i].start) && (nowMinutes < daySchedule[nextIdx].start))) )
-			{
-				Serial.printf("AND selected Prog: %d ", i);
-				currentProg = i;
-				break;
-			}
-			if ( ((dayTransit) && ((nowMinutes >= daySchedule[i].start) || (nowMinutes < daySchedule[nextIdx].start))) )
-			{
-				Serial.printf("OR selected Prog: %d ", i);
-				currentProg = i;
-				break;
-			}
+			Serial.println("active = false");
+			targetTemp = antiFrozen;
 		}
-
-		if (_manual && !_prevManual)
-		{
-			Serial.println("turn Manual on by user");
-			_prevManual = true;
-			_manualProg = currentProg;
-//			targetTemp = float(_manualTargetTemp / 100.0);
-		}
-		else if (_prevManual && !_manual)
-		{
-			Serial.println("turn Manual off by user");
-			_prevManual = false;
-		}
-
-		if (_manual)
-			targetTemp = float(_manualTargetTemp / 100.0);
 		else
-			targetTemp = (float)daySchedule[currentProg].targetTemp / 100.0; //in-place convert to float
-
-		if (_manual && (_manualProg != currentProg))
 		{
-			Serial.println("turn Manual off with program change");
-			_manual = false;
-			_prevManual = false;
-			targetTemp = (float)daySchedule[currentProg].targetTemp / 100.0; //in-place convert to float
+			DateTime now = SystemClock.now(eTZ_Local);
+			SchedUnit daySchedule[maxProg] = _schedule[now.DayofWeek];
+			uint16_t nowMinutes = now.Hour * 60 + now.Minute;
+			Serial.printf("Name: %s, DateTime: %s,", _name.c_str(), now.toFullDateTimeString().c_str());
+
+			for (uint8_t i = 0; i < maxProg; i++)
+			{
+				uint8_t nextIdx = i < (maxProg - 1) ? i + 1 : 0;
+	//			Serial.printf("I: %d, nextIdx: %d, nowMinutes: %d, daySchedule[i].minutes: %d, daySchedule[nextIdx].minutes: %d ",i, nextIdx, nowMinutes, daySchedule[i].start, daySchedule[nextIdx].start);
+
+				bool dayTransit = daySchedule[i].start > daySchedule[nextIdx].start;
+	//			Serial.printf("dayTransit: %d\n", dayTransit);
+
+				if ( ((!dayTransit) && ((nowMinutes >= daySchedule[i].start) && (nowMinutes < daySchedule[nextIdx].start))) )
+				{
+					Serial.printf("AND selected Prog: %d ", i);
+					currentProg = i;
+					break;
+				}
+				if ( ((dayTransit) && ((nowMinutes >= daySchedule[i].start) || (nowMinutes < daySchedule[nextIdx].start))) )
+				{
+					Serial.printf("OR selected Prog: %d ", i);
+					currentProg = i;
+					break;
+				}
+			}
+
+			if (_manual && !_prevManual)
+			{
+				Serial.println("turn Manual on by user");
+				_prevManual = true;
+				_manualProg = currentProg;
+	//			targetTemp = float(_manualTargetTemp / 100.0);
+			}
+			else if (_prevManual && !_manual)
+			{
+				Serial.println("turn Manual off by user");
+				_prevManual = false;
+			}
+
+			if (_manual)
+				targetTemp = float(_manualTargetTemp / 100.0);
+			else
+				targetTemp = (float)daySchedule[currentProg].targetTemp / 100.0; //in-place convert to float
+
+			if (_manual && (_manualProg != currentProg))
+			{
+				Serial.println("turn Manual off with program change");
+				_manual = false;
+				_prevManual = false;
+				targetTemp = (float)daySchedule[currentProg].targetTemp / 100.0; //in-place convert to float
+			}
 		}
+
+		Serial.print("targetTemp: "); Serial.print(targetTemp); //FLOAT!!!
+
+		if (currTemp >= targetTemp + (float)(_targetTempDelta / 100.0))
+			_state = false;
+		if (currTemp <= targetTemp - (float)(_targetTempDelta / 100.0))
+			_state = true;
 	}
-
-	Serial.print("targetTemp: "); Serial.print(targetTemp); //FLOAT!!!
-
-	if (currTemp >= targetTemp + (float)(_targetTempDelta / 100.0))
-		_state = false;
-	if (currTemp <= targetTemp - (float)(_targetTempDelta / 100.0))
-		_state = true;
 	Serial.printf(" State: %s\n", _state ? "true" : "false");
 	if (prevState != _state && onChangeState)
 	{

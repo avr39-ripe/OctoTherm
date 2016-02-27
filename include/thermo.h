@@ -12,6 +12,7 @@
 
 typedef Delegate<void(uint8_t state)> onStateChangeDelegate;
 
+const uint8_t maxUnhealthyGetTemp = 10; // max unhealthy getTemp before we assume tempsensor lost
 const uint8_t maxProg = 6;
 const uint8_t antiFrozen = 5; // temperature to maintain when thermostat is not _active to prevent system freeze
 
@@ -55,17 +56,18 @@ public:
 	void onStateChange(onStateChangeDelegate delegateFunction);
 private:
 	String _name; // some text description of thermostat
-	bool _active; //thermostat active (true), ON,  works, updates, changes its _state or turned OFF
-	bool _state; // thermostat state on (true) or off (false)
-	bool _manual; //thermostat in manual mode (true) or automatic schedule mode (false)
+	uint8_t _active; //thermostat active (true), ON,  works, updates, changes its _state or turned OFF
+	uint8_t _state; // thermostat state on (true) or off (false)
+	uint8_t _manual; //thermostat in manual mode (true) or automatic schedule mode (false)
 	uint16_t _manualTargetTemp = 2000; //target temperature for manual mode MULTIPLE BY 100
 	uint16_t _targetTempDelta = 50; //delta +- for both _targetTemp and manualTargetTemp MULTIPLE BY 100
 	uint16_t _refresh; // thermostat update interval
 	Timer _refreshTimer; // timer for thermostat update
 	TempSensor *_tempSensor;
-	bool _prevManual = false; // previous state of _manual
+	uint8_t _prevManual = false; // previous state of _manual
 	uint8_t _manualProg = 0; // program that was when manual mode turned on, when program change, manual mode will turn off
 	onStateChangeDelegate onChangeState = nullptr;
+	uint8_t _tempSensorHealthy = maxUnhealthyGetTemp; // if more than zero we STILL trust tempSensor temperature if less zero NOT trust
 };
 
 
