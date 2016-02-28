@@ -1,8 +1,8 @@
 #ifndef INCLUDE_OCTOTHERM_H_
 #define INCLUDE_OCTOTHERM_H_
 #include <configuration.h>
-#include <SmingCore/SmingCore.h>
-#include <Libraries/OneWire/OneWire.h>
+#include <SmingCore.h>
+#include <libraries/OneWire/OneWire.h>
 #include <tempsensor.h>
 #include <switch.h>
 #include <thermo.h>

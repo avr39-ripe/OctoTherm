@@ -7,7 +7,7 @@
 
 #ifndef INCLUDE_THERMO_H_
 #define INCLUDE_THERMO_H_
-#include <SmingCore/SmingCore.h>
+#include <SmingCore.h>
 #include <tempsensor.h>
 
 typedef Delegate<void(uint8_t state)> onStateChangeDelegate;

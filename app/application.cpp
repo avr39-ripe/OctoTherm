@@ -1,4 +1,3 @@
-#include <user_config.h>
 #include <octotherm.h>
 
 Timer counterTimer;

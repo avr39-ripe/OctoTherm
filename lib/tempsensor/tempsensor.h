@@ -1,7 +1,7 @@
 #ifndef INCLUDE_TEMPSENSOR_H_
 #define INCLUDE_TEMPSENSOR_H_
-#include <SmingCore/SmingCore.h>
-#include <Libraries/OneWire/OneWire.h>
+#include <SmingCore.h>
+#include <libraries/OneWire/OneWire.h>
 
 namespace TempsensorConnectionStatus
 {

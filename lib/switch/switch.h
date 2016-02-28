@@ -7,7 +7,7 @@
 
 #ifndef LIB_SWITCH_SWITCH_H_
 #define LIB_SWITCH_SWITCH_H_
-#include <SmingCore/SmingCore.h>
+#include <SmingCore.h>
 
 namespace SwitchState
 {
