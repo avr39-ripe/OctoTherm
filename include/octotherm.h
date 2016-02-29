@@ -7,6 +7,7 @@
 #include <switch.h>
 #include <thermo.h>
 
+extern char gbuf[4096];
 //WIFI Stuff
 //const uint8_t stationCacheSize = 4;
 //extern struct station_config configSlots[stationCacheSize];

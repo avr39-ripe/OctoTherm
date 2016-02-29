@@ -131,7 +131,7 @@ void Thermostat::stop()
 
 uint8_t Thermostat::loadStateCfg()
 {
-	StaticJsonBuffer<stateJsonBufSize> jsonBuffer;
+	DynamicJsonBuffer jsonBuffer;
 
 	if (fileExist(".state" + _name))
 	{
@@ -163,7 +163,8 @@ void Thermostat::onStateCfg(HttpRequest &request, HttpResponse &response)
 		}
 		else
 		{
-			StaticJsonBuffer<stateJsonBufSize> jsonBuffer;
+//			StaticJsonBuffer<stateJsonBufSize> jsonBuffer;
+			DynamicJsonBuffer jsonBuffer;
 			JsonObject& root = jsonBuffer.parseObject(request.getBody());
 			root.prettyPrintTo(Serial); //Uncomment it for debuging
 
@@ -213,7 +214,7 @@ void Thermostat::onStateCfg(HttpRequest &request, HttpResponse &response)
 
 uint8_t Thermostat::saveStateCfg()
 {
-	StaticJsonBuffer<stateJsonBufSize> jsonBuffer;
+	DynamicJsonBuffer jsonBuffer;
 	JsonObject& root = jsonBuffer.createObject();
 
 	root["name"] = _name.c_str();
@@ -224,16 +225,16 @@ uint8_t Thermostat::saveStateCfg()
 
 //	root.prettyPrintTo(Serial);
 
-	char buf[stateFileBufSize];
-	root.printTo(buf, sizeof(buf));
-	fileSetContent(".state" + _name, buf);
+//	char buf[stateFileBufSize];
+	root.printTo(gbuf, sizeof(gbuf));
+	fileSetContent(".state" + _name, gbuf);
 
 	return 0;
 }
 
 uint8_t Thermostat::loadScheduleCfg()
 {
-	StaticJsonBuffer<scheduleJsonBufSize> jsonBuffer;
+	DynamicJsonBuffer jsonBuffer;
 
 	if (fileExist(".sched" + _name))
 	{
@@ -259,7 +260,7 @@ uint8_t Thermostat::loadScheduleCfg()
 
 void Thermostat::onScheduleCfg(HttpRequest &request, HttpResponse &response)
 {
-	StaticJsonBuffer<scheduleJsonBufSize> jsonBuffer;
+	DynamicJsonBuffer jsonBuffer;
 	if (request.getRequestMethod() == RequestMethod::POST)
 	{
 		if (request.getBody() == NULL)
@@ -305,17 +306,17 @@ void Thermostat::onScheduleCfg(HttpRequest &request, HttpResponse &response)
 				jsonDay.add(jsonProg);
 			}
 		}
-		char buf[scheduleFileBufSize];
-		root.printTo(buf, sizeof(buf));
+//		char buf[scheduleFileBufSize];
+		root.printTo(gbuf, sizeof(gbuf));
 
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setContentType(ContentType::JSON);
-		response.sendString(buf);
+		response.sendString(gbuf);
 	}
 }
 uint8_t Thermostat::saveScheduleCfg()
 {
-	StaticJsonBuffer<scheduleJsonBufSize> jsonBuffer;
+	DynamicJsonBuffer jsonBuffer;
 	JsonObject& root = jsonBuffer.createObject();
 	for (uint8_t day = 0; day < 7; day++)
 	{
@@ -330,9 +331,9 @@ uint8_t Thermostat::saveScheduleCfg()
 	}
 	root.prettyPrintTo(Serial);
 
-	char buf[scheduleFileBufSize];
-	root.printTo(buf, sizeof(buf));
-	fileSetContent(".sched" + _name, buf);
+//	char buf[scheduleFileBufSize];
+	root.printTo(gbuf, sizeof(gbuf));
+	fileSetContent(".sched" + _name, gbuf);
 }
 
 void Thermostat::saveScheduleBinCfg()

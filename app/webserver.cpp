@@ -127,19 +127,19 @@ void onScheduleJson(HttpRequest &request, HttpResponse &response)
 
 void onThermostatsJson(HttpRequest &request, HttpResponse &response)
 {
-	StaticJsonBuffer<thermostatsJsonBufSize> jsonBuffer;
+	DynamicJsonBuffer jsonBuffer;
 	JsonObject& root = jsonBuffer.createObject();
 	for (uint t=0; t < maxThermostats; t++)
 	{
 		root[(String)t] = thermostat[t]->getName();
 
 	}
-	char buf[scheduleFileBufSize];
-	root.printTo(buf, sizeof(buf));
+//	char buf[scheduleFileBufSize];
+	root.printTo(gbuf, sizeof(gbuf));
 
 	response.setHeader("Access-Control-Allow-Origin", "*");
 	response.setContentType(ContentType::JSON);
-	response.sendString(buf);
+	response.sendString(gbuf);
 
 
 }

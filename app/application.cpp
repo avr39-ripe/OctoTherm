@@ -1,5 +1,6 @@
 #include <octotherm.h>
 
+char gbuf[4096];
 Timer counterTimer;
 void counter_loop();
 unsigned long counter = 0;
@@ -23,7 +24,7 @@ void initialWifiConfig()
 	struct softap_config apconfig;
 	if(wifi_softap_get_config_default(&apconfig))
 	{
-		if (os_strncmp((const char *)apconfig.ssid, (const char *)"TyTherm", 32) != 0)
+		if (strncmp((const char *)apconfig.ssid, (const char *)"TyTherm", 32) != 0)
 		{
 			WifiAccessPoint.config("TyTherm", "20040229", AUTH_WPA2_PSK);
 
