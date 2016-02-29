@@ -49,9 +49,10 @@ void init()
 {
 	spiffs_mount(); // Mount file system, in order to work with files
 	Serial.begin(SERIAL_BAUD_RATE); // 115200 by default
-	Serial.systemDebugOutput(false);
+	Serial.systemDebugOutput(true);
 	Serial.commandProcessing(false);
 
+	Serial.printf("FreeHeap: %d\n", system_get_free_heap_size());
 	Serial.printf("COMPILE-IN SSID: %s, PASSWORD: %s\n", WIFI_SSID, WIFI_PWD);
 
 	SystemClock.setTimeZone(2);

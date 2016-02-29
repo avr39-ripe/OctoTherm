@@ -24,6 +24,7 @@ void Thermostat::check()
 	uint8_t currentProg = 0;
 	bool prevState = _state;
 
+	Serial.printf("FreeHeap: %d\n", system_get_free_heap_size());
 	if (_tempSensor->isHealthy())
 	{
 		_tempSensorHealthy = maxUnhealthyGetTemp;
